@@ -1,11 +1,3 @@
-% This script reads the sensor data from Chip 5 taken on 6/16/2022.
-% It does baseline correction on the data, and finds the response vs
-% concentration plot.
-% This script only deals with the data from Pads 7-12.
-% Author: Jerry Chen
-% Date Created: 7/13/2022
-% Last Updated: 7/13/2022
-
 %% OPTIONS
 clear; close all; clc;
 % Some Options
