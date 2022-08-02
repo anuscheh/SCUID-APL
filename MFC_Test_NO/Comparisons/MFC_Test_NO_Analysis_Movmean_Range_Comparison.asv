@@ -24,7 +24,7 @@ minimize_figures = false;
 if minimize_figures == true
     figure_state = "minimized";
 else
-    figure_state = "normal";
+    figure_state = "maximized";
 end
 % - Time window finding method: 
 % ----- true  = auto define from flow file info
@@ -47,13 +47,17 @@ else
     t_f = 4.8 * 60 * 60;
 end
 
+% ==========> Comparison Settings <==========
 movmean_ranges = [5; 10; 15; 30; 50];
+designated_pad = 12;
 
 %% LOADING DATA
 
 % I put the .mat file in the same directory as this script. Make sure you
 % specify the directory when you use this script.
-load("CNT_Results_NO.mat")
+data_loc = cd;
+data_loc = fullfile(data_loc, '..');
+load(fullfile(data_loc, "CNT_Results_NO.mat"))
 
 %% DATA PROCESSING
 % Define start of collection to be zero second.
@@ -83,17 +87,17 @@ noppm_wndw = CNT_Results_NO(entry).noppm(run_range);
 NO_free_indices = find(~noppm_wndw);
 
 % Process the noppm data to remove pre-spikes.
-noppm_spike = figure('Name', 'NO Spike Removal', 'NumberTitle', 'off');
-noppm_spike.WindowState = figure_state;
-plot(time_wndw, noppm_wndw, 'r-'); hold on;
+% noppm_spike = figure('Name', 'NO Spike Removal', 'NumberTitle', 'off');
+% noppm_spike.WindowState = figure_state;
+% plot(time_wndw, noppm_wndw, 'r-'); hold on;
 
 noppm_wndw_rmspk = hampel(noppm_wndw, 15);
-plot(time_wndw, noppm_wndw_rmspk, 'b-', LineWidth=2); 
-title('NO Concentration over time')
-legend('Original Data', 'Pre-Spikes Removed')
-xlabel('Time (s)')
-ylabel('Concentration')
-hold off
+% plot(time_wndw, noppm_wndw_rmspk, 'b-', LineWidth=2); 
+% title('NO Concentration over time')
+% legend('Original Data', 'Pre-Spikes Removed')
+% xlabel('Time (s)')
+% ylabel('Concentration')
+% hold off
 
 % Auto detect start and end of exposure
 stp_i = detect_start(noppm_wndw_rmspk);
@@ -169,8 +173,8 @@ ax4 = nexttile;
 hold(ax4, "on")
 legend()
 title('Response vs. Concentration Using Various Ranges');
-subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pad 7, " + ...
-    CNT_Results_NO(entry).addinfo);
+subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pad " + ...
+    designated_pad + ", " + CNT_Results_NO(entry).addinfo);
 xlabel('NO Concentration')
 ylabel('Response');
 
@@ -243,9 +247,18 @@ for pad = designated_pad
         for step = 1:length(stp_i)
             max_rsp(step) = max(r_pad_wndw_blred_rmol_smth(stp_i(step):stp_f(step)));   
         end
-        plot(ax4, noppm_stp_avg, max_rsp, '-', DisplayName= num2str(movmean_ranges(j,1)))
+        plot(ax4, noppm_stp_avg, max_rsp, '-', ...
+            DisplayName= num2str(movmean_ranges(j,1)), LineWidth= 1.5)
     end
 end
+
+%% Saving Figure(s)
+figfilename = ['/MFC_Test_NO_Analysis_Movmean_Range_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad'  num2str(designated_pad)  '.png'];
+saveas(movmean_comp,[pwd figfilename]);
+% saveas(movmean_comp, fullfile(cd, './', 'Move Mean Range Comparison', strcat('Pad', designated_pad, 'movmean range compare.png')));
+% data_loc = cd;
+% data_loc = fullfile(data_loc, '..');
+% load(fullfile(data_loc, "CNT_Results_NO.mat"))
 
 %% CUSTOM FUNCTIONS
 % Detect Start of Exposure

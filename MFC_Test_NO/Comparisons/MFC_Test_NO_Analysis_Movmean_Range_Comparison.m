@@ -49,7 +49,7 @@ end
 
 % ==========> Comparison Settings <==========
 movmean_ranges = [5; 10; 15; 30; 50];
-designated_pad = 12;
+designated_pad = 7;
 
 %% LOADING DATA
 
@@ -253,7 +253,7 @@ for pad = designated_pad
 end
 
 %% Saving Figure(s)
-figfilename = ['/MFC_Test_NO_Analysis_Movmean_Range_Comparison_Results/pad'  num2str(designated_pad)  '.png'];
+figfilename = ['/MFC_Test_NO_Analysis_Movmean_Range_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad_'  num2str(designated_pad)  '.png'];
 saveas(movmean_comp,[pwd figfilename]);
 % saveas(movmean_comp, fullfile(cd, './', 'Move Mean Range Comparison', strcat('Pad', designated_pad, 'movmean range compare.png')));
 % data_loc = cd;
