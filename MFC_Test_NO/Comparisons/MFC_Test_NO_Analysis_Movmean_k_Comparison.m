@@ -41,7 +41,7 @@ end
 
 % ==========> Comparison Settings <==========
 movmean_ranges = [5; 10; 15; 30; 50];
-designated_pad = 7;
+designated_pad = 12;
 
 %% LOADING DATA
 
