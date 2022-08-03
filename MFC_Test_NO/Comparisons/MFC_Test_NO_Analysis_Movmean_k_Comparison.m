@@ -157,18 +157,38 @@ end
 % ylabel('Response');
 
 % Moving mean range comparison
-movmean_comp = figure('Name', 'Move Mean Range Comparison', ...
+movmean_comp_rvc = figure('Name', ...
+    'Move Mean k value Comparison - Response vs. Concentration', ...
     'NumberTitle', 'off');
-movmean_comp.WindowState = figure_state;
+movmean_comp_rvc.WindowState = figure_state;
 tiledlayout(1,1)
 ax4 = nexttile;
 hold(ax4, "on")
 legend()
-title('Response vs. Concentration Using Various Ranges');
+title({'Response vs. Concentration', 'Using Different Numbers of', ...
+    'Moving Mean Local Points (k)'});
 subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pad " + ...
     designated_pad + ", " + CNT_Results_NO(entry).addinfo);
 xlabel('NO Concentration')
 ylabel('Response');
+ax4.FontSize = 16;
+
+movmean_comp_rvt = figure('Name', ...
+    'Moving Mean k value Comparison - Response vs. Time', ...
+    'NumberTitle', 'off');
+movmean_comp_rvt.WindowState = figure_state;
+tiledlayout(1,1)
+ax5 = nexttile;
+hold(ax5, "on")
+legend()
+title({'Response vs. Time', 'Using Different Numbers of', ...
+    'Moving Mean Local Points (k)'});
+subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pad " + ...
+    designated_pad + ", " + CNT_Results_NO(entry).addinfo);
+xlabel('Time')
+ylabel('Response');
+ax5.FontSize = 16;
+
 
 %%
 for pad = designated_pad
@@ -236,17 +256,46 @@ for pad = designated_pad
     % Add plot to response vs concentration graph (all pads in one)
     
         max_rsp = zeros(size(stp_i));
+        max_rsp_ind = zeros(size(stp_i));
         for step = 1:length(stp_i)
-            max_rsp(step) = max(r_pad_wndw_blred_rmol_smth(stp_i(step):stp_f(step)));   
+            step_range = stp_i(step):stp_f(step);
+            [max_rsp(step),  max_ind] = max(r_pad_wndw_blred_rmol_smth(step_range));   
+            max_rsp_ind(step) = step_range(max_ind);
         end
-        plot(ax4, noppm_stp_avg, max_rsp, '-', ...
-            DisplayName= num2str(movmean_ranges(j,1)), LineWidth= 1.5)
+
+        plot(ax4, noppm_stp_avg, max_rsp, '.-', MarkerSize=18, ...
+            DisplayName = strcat("k=", num2str(movmean_ranges(j,1))), ...
+            LineWidth= 1.5)
+
+        plot(ax5, time_wndw_rmol, r_pad_wndw_blred_rmol_smth, ...
+            DisplayName = strcat('k=', num2str(movmean_ranges(j,1))), ...
+            LineWidth= 1.5)
+        
+        disp('Max Response Values are')
+        disp(max_rsp)
+
+%         max_rsp_ind = zeros(size(stp_i));
+%         for k = 1:length(max_rsp_ind)
+%             max_val = max_rsp(k);
+%             max_rsp_ind(k) = find(abs(r_pad_wndw_blred_rmol_smth - max_val) < 0.001);
+% 
+%         end
+        disp(max_rsp_ind)
+        plot(ax5, time_wndw_rmol(max_rsp_ind), max_rsp, '*', MarkerSize=24, ...
+            DisplayName = strcat('maxima when k=', num2str(movmean_ranges(j,1))), ...
+            LineWidth= 1.5)
     end
+    color_reorder = colororder(ax5);
+    color_reorder = kron(color_reorder,ones(2,1));
+    disp(color_reorder)
+    colororder(ax5, color_reorder)
 end
 
 %% Saving Figure(s)
-figfilename = ['/MFC_Test_NO_Analysis_Movmean_Range_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad_'  num2str(designated_pad)  '.png'];
-saveas(movmean_comp,[pwd figfilename]);
+figfilename1 = ['/MFC_Test_NO_Analysis_Movmean_k_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad_'  num2str(designated_pad)  '_rvc.png'];
+saveas(movmean_comp_rvc,[pwd figfilename1]);
+figfilename2 = ['/MFC_Test_NO_Analysis_Movmean_k_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad_'  num2str(designated_pad)  '_rvt.png'];
+saveas(movmean_comp_rvt,[pwd figfilename2]);
 % saveas(movmean_comp, fullfile(cd, './', 'Move Mean Range Comparison', strcat('Pad', designated_pad, 'movmean range compare.png')));
 % data_loc = cd;
 % data_loc = fullfile(data_loc, '..');
