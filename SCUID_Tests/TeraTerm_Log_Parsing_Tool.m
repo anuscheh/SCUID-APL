@@ -60,7 +60,7 @@ test_date = datetime(input("When was this test conducted? [YYYY-MM-DD]: ","s"));
 gas_type = input("What is the gas injected? [e.g. NO]: ","s");
 chip_name = input("Which sensor chip is installed? [e.g. AMES5]: ","s");
 comments = input(sprintf("Please type any extra comments you would like to add:\n"),"s");
-fprintf("OK! I have got all the necessary information.\n" + ...
+fprintf("\nOK! I have got all the necessary information.\n" + ...
     "Now I will start processing the log file.\n")
 %% Extracting Lines From Log File
 % Removing non-data lines
@@ -163,7 +163,7 @@ SCUID_Test_Results(entry,1).Time = timestamp_dt;
 SCUID_Test_Results(entry,1).TimeUE = timestamp_ue;
 SCUID_Test_Results(entry,1).Temp0 = temp0_c;
 SCUID_Test_Results(entry,1).Temp1 = temp1_c;
-SCUID_Test_Results(entry,1).Humidity = humidity;
+SCUID_Test_Results(entry,1).RH = humidity;
 SCUID_Test_Results(entry,1).Sensors = sensor_readings;
 cprintf('green', "Done!\n\n")
 % Saving .mat file
