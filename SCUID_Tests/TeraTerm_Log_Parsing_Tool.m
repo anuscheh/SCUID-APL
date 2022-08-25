@@ -3,7 +3,7 @@
 % easy-to-process data.
 % Author: Jerry Chen
 % Time Created: August 11, 2022
-% Last Edited:  August 11, 2022
+% Last Edited:  August 25, 2022
 
 clear; close all; clc;
 %% General Parameters
