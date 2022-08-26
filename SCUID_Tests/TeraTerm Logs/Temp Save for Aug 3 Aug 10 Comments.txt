@@ -1,0 +1,5 @@
+Aug 3
+'This is the result of the first leak test on the SCUID loop. 30 mL of CO2 was injected at one time to inflict a drastic pressure change in the system.'
+
+Aug 10
+'This test was done after flow cell reinstall to make sure there are no pressure leaks. Two injections of NO water, 15 mL each, was administered. tau of ~5000 with pump on.'
