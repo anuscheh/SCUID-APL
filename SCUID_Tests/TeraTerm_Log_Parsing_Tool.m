@@ -56,8 +56,17 @@ while isempty(log_raw_lines)
 end
 %% Asking User to give extra information
 disp("Now I'd like to request some basic information about this log.")
-test_date = datetime(input("When was this test conducted? [YYYY-MM-DD]: ","s"));
+test_date = input("When was this test conducted? [YYYY-MM-DD]: ","s");
 gas_type = input("What is the gas injected? [e.g. NO]: ","s");
+inj_count = input("How many times did you inject the gas? [e.g. 2]:");
+disp("When and how much was injected each time?")
+inj_time = strings(inj_count,1);
+inj_amount = zeros(inj_count,1);
+for inj = 1:inj_count
+    input_time = input("Injection " + num2str(inj) + " time [HH:MM:SS]: ","s");
+    inj_time(inj) = strcat(test_date, " ", input_time);
+    inj_amount(inj) = input("Injection " + num2str(inj) + " amount in mL: ");
+end
 chip_name = input("Which sensor chip is installed? [e.g. AMES5]: ","s");
 comments = input(sprintf("Please type any extra comments you would like to add:\n"),"s");
 fprintf("\nOK! I have got all the necessary information.\n" + ...
@@ -154,8 +163,10 @@ fprintf("Saving all data to a new entry in the struct object...\n")
 [srow, scol] = size(SCUID_Test_Results);
 entry = srow + 1;
 % Basic info
-SCUID_Test_Results(entry,1).TestDate = test_date;
+SCUID_Test_Results(entry,1).TestDate = datetime(test_date);
 SCUID_Test_Results(entry,1).GasType = gas_type;
+SCUID_Test_Results(entry,1).InjectionTime = datetime(inj_time);
+SCUID_Test_Results(entry,1).InjectionAmount = inj_amount;
 SCUID_Test_Results(entry,1).Chip = chip_name;
 SCUID_Test_Results(entry,1).Comments = comments;
 % Actual data
