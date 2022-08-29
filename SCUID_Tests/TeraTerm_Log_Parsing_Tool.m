@@ -122,6 +122,18 @@ temp1_col = log_data_array(:,temp1_index);
 temp1_c = str2double(erase(temp1_col, "T1="))./100;
 cprintf('green', "Done!\n\n")
 
+%% Getting Pressure 0 in degrees mbar
+p0_index = 10;
+disp("Getting Pressure 0 in mbar...")
+p0_mbar = log_data_array(:,p0_index);
+cprintf('green', "Done!\n\n")
+
+%% Getting Pressure 1 in degrees mbar
+p1_index = 13;
+disp("Getting Pressure 1 in mbar...")
+p1_mbar = log_data_array(:,p1_index);
+cprintf('green', "Done!\n\n")
+
 %% Getting Humidity in percentage
 disp("Getting Humidity in percentage...")
 humid_index = find(contains(log_data_array(1,:), "H="));
@@ -174,6 +186,8 @@ SCUID_Test_Results(entry,1).Time = timestamp_dt;
 SCUID_Test_Results(entry,1).TimeUE = timestamp_ue;
 SCUID_Test_Results(entry,1).Temp0 = temp0_c;
 SCUID_Test_Results(entry,1).Temp1 = temp1_c;
+SCUID_Test_Results(entry,1).P0 = p0_mbar;
+SCUID_Test_Results(entry,1).P1 = p1_mbar;
 SCUID_Test_Results(entry,1).RH = humidity;
 SCUID_Test_Results(entry,1).Sensors = sensor_readings;
 cprintf('green', "Done!\n\n")
