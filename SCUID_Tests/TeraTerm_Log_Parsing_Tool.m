@@ -125,13 +125,13 @@ cprintf('green', "Done!\n\n")
 %% Getting Pressure 0 in degrees mbar
 p0_index = 10;
 disp("Getting Pressure 0 in mbar...")
-p0_mbar = log_data_array(:,p0_index);
+p0_mbar = str2double(log_data_array(:,p0_index));
 cprintf('green', "Done!\n\n")
 
 %% Getting Pressure 1 in degrees mbar
 p1_index = 13;
 disp("Getting Pressure 1 in mbar...")
-p1_mbar = log_data_array(:,p1_index);
+p1_mbar = str2double(log_data_array(:,p1_index));
 cprintf('green', "Done!\n\n")
 
 %% Getting Humidity in percentage
