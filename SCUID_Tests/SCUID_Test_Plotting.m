@@ -15,6 +15,9 @@ else
     figure_state = "maximized";
 end
 
+% Save figures automatically
+auto_save = false;
+
 %% Loading Data
 load('SCUID_Test_Results.mat')
 
@@ -118,6 +121,12 @@ for i = 1:length(SCUID_Test_Results(tgt_entry,1).InjectionTime)
     for ax = [ax_rh ax_temp ax_p ax_sg1 ax_sg2]
         display_name = strcat(gas_type, " Injection ", num2str(i));
         xline(ax, xline_pos, '-', display_name, ...
-            FontSize=20, HandleVisibility='off')
+            FontSize=20, LineWidth=2, HandleVisibility='off')
     end
+end
+
+%% Saving figures
+if auto_save
+    % TBD: automatically save all figures into folders. 
+    % Working on folder naming scheme.
 end
