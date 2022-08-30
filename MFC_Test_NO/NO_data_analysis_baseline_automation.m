@@ -81,7 +81,7 @@ noppm_wndw = CNT_Results_NO(entry).noppm(run_range);
 NO_free_indices = find(~noppm_wndw);
 
 % Process the noppm data to remove pre-spikes.
-noppm_spike = figure('Name', 'NO Spike Removal', 'NumberTitle', 'off');
+noppm_spike = figure('Name', 'NO Spike Removal');
 noppm_spike.WindowState = figure_state;
 plot(time_wndw, noppm_wndw, 'r-'); hold on;
 
@@ -117,46 +117,50 @@ for step = 1:length(stp_i)
     noppm_stp_avg(step) = mean(noppm_wndw_rmspk(stp_i(step):stp_f(step)));
 end
 
-% Plotting response vs concentration (raw response)
-rsp_vs_noppm = figure('Name', 'Response vs. Concentration', ...
-    'NumberTitle', 'off');
-rsp_vs_noppm.WindowState = figure_state;
-tiledlayout(1,1)
-ax1 = nexttile;
-hold(ax1, "on")
-legend()
-title('Response at Different Added NO Concentration');
-subtitle(strcat('Chip ', num2str(CNT_Results_NO(entry).chip), ', Pads 7-12, ', CNT_Results_NO(entry).addinfo));
-xlabel('NO Concentration');
-ylabel('Response');
 
-% Plotting response over time (baseline corrected)
-rsp_blc = figure('Name', 'Response - Baseline Corrected', ...
-    'NumberTitle', 'off');
-rsp_blc.WindowState = figure_state;
-tiledlayout(1,1)
-ax2 = nexttile;
-hold(ax2, "on")
-legend()
-title('Response Over Time - Baseline Corrected');
-subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pads 7-12, " + ...
-    CNT_Results_NO(entry).addinfo);
-xlabel('Time (s)')
-ylabel('Response');
-
-% Plotting response over time (raw)
-rsp_raw = figure('Name', 'Response - Raw Data', ...
-    'NumberTitle', 'off');
+%% Figures for response over time 
+% Before Baseline Correction
+rsp_raw = figure('Name', 'Response - Raw Data');
 rsp_raw.WindowState = figure_state;
 tiledlayout(1,1)
-ax3 = nexttile;
-hold(ax3, "on")
+ax_rsp_v_t_raw = nexttile;
+hold(ax_rsp_v_t_raw, "on")
 legend()
 title('Response Over Time - Raw Data');
 subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pads 7-12, " + ...
     CNT_Results_NO(entry).addinfo);
 xlabel('Time (s)')
 ylabel('Response');
+fontsize(ax_rsp_v_t_raw, 20, "points")
+
+% After Baseline Correction
+rsp_blc = figure('Name', 'Response - Baseline Corrected');
+rsp_blc.WindowState = figure_state;
+tiledlayout(1,1)
+ax_rsp_v_t = nexttile;
+hold(ax_rsp_v_t, "on")
+legend()
+title('Response Over Time - Baseline Corrected');
+subtitle("Chip " + num2str(CNT_Results_NO(entry).chip) + " Pads 7-12, " + ...
+    CNT_Results_NO(entry).addinfo);
+xlabel('Time (s)')
+ylabel('Response');
+fontsize(ax_rsp_v_t, 20, "points")
+
+%% Figure for response vs concentration
+rsp_vs_noppm = figure('Name', 'Response vs. Concentration');
+rsp_vs_noppm.WindowState = figure_state;
+tiledlayout(1,1)
+ax_rsp_v_con = nexttile;
+hold(ax_rsp_v_con, "on")
+legend()
+title('Response at Different Added NO Concentration');
+subtitle(strcat('Chip ', num2str(CNT_Results_NO(entry).chip), ...
+    ', Pads 7-12, ', CNT_Results_NO(entry).addinfo));
+xlabel('NO Concentration');
+ylabel('Response');
+fontsize(ax_rsp_v_con, 20, "points")
+
 %%
 for pad = 7:12
     % pick out data for specific pad
@@ -166,26 +170,35 @@ for pad = 7:12
     % normalize data using r0 = response at end of pre-purge
     r0 = r_pad_wndw(stp_i(1)-10);
     r_pad_wndw_norm = (r_pad_wndw)./r0 * 100;
-    plot(ax3, time_wndw, movmean(r_pad_wndw_norm, 15), ...
+    % Plot raw response of all pads in one axis
+    plot(ax_rsp_v_t_raw, time_wndw, movmean(r_pad_wndw_norm, 15), ...
         DisplayName=['Pad ' num2str(pad)])
 
-    rsp_raw = figure('Name', "Pad "+pad+" Response - Raw", 'NumberTitle', 'off');
+    % Making a new figure for raw response and baseline corrected data
+    % of a single pad
+    rsp_raw = figure('Name', "Pad " + pad + " Response - Raw");
     rsp_raw.WindowState = figure_state;
-    plot(time_wndw, movmean(r_pad_wndw_norm,15)); hold on;
+    tiledlayout(1,1)
+    ax_rsp_raw_pad = nexttile;
+    hold(ax_rsp_raw_pad, 'on')
+    plot(ax_rsp_raw_pad, time_wndw, movmean(r_pad_wndw_norm,15));
    
     %　BASELINE CORRECTION
     % Curve fitting on data when there isn't NO exposure
     X = time_wndw(NO_free_indices);
     Y = r_pad_wndw_norm(NO_free_indices);
     [r_pad_wndw_blfit, gof] = fit(X, Y, 'exp1');
+    disp(gof)
     
     % Visual check of fit
-    plot(r_pad_wndw_blfit, time_wndw, r_pad_wndw_norm);
-    title('Response Before Baseline Correction')
-    subtitle("chip " + num2str(CNT_Results_NO(entry).chip) + " - pad " + ...
-        num2str(pad) + " - date: " + CNT_Results_NO(entry).addinfo)
-    hold off;
-    disp(gof)
+%     plot(ax_rsp_raw_pad, r_pad_wndw_blfit, time_wndw, r_pad_wndw_norm);
+%     title(ax_rsp_raw_pad, 'Response Before Baseline Correction')
+%     subtitle_txt = strcat("chip ", num2str(CNT_Results_NO(entry).chip), ...
+%         " - pad ", num2str(pad), " - date: ", CNT_Results_NO(entry).addinfo);
+%     subtitle(ax_rsp_raw_pad, subtitle_txt)
+%     fontsize(ax_rsp_raw_pad, 20, "points")
+    hold(ax_rsp_raw_pad, 'off');
+    
 
     % Subtracting baseline from original response data
     r_pad_wndw_bl = r_pad_wndw_blfit(time_wndw);
@@ -199,19 +212,25 @@ for pad = 7:12
     disp(length(time_wndw_rmol))
     disp(length(r_pad_wndw_blred_rmol))
     
-    rsp_blc = figure('Name', "Pad "+pad+" Response - Baseline Corrected", ...
-        'NumberTitle', 'off');
+    % Plotting baseline corrected data of each pad
+    rsp_blc = figure('Name', "Pad "+pad+" Response - Baseline Corrected");
     rsp_blc.WindowState = figure_state;
+    tiledlayout(1,1)
+    hold(ax_rsp_raw_pad, 'on')
+    ax_rsp_blc_pad = nexttile;
     if rsp_smooth == true
         r_pad_wndw_blred_rmol = movmean(r_pad_wndw_blred_rmol, 15);
     end
-    plot(time_wndw_rmol, r_pad_wndw_blred_rmol)
-    title('Response After Baseline Correction')
-    subtitle("chip " + num2str(CNT_Results_NO(entry).chip) + " - pad " + ...
-        num2str(pad) + " - date: " + CNT_Results_NO(entry).addinfo)
-    
+    plot(ax_rsp_blc_pad, time_wndw_rmol, r_pad_wndw_blred_rmol)
+    title(ax_rsp_blc_pad, 'Response After Baseline Correction')
+    subtitle_txt = strcat( "chip ", num2str(CNT_Results_NO(entry).chip), ...
+        " - pad ", num2str(pad), " - date: ", CNT_Results_NO(entry).addinfo);
+    subtitle(ax_rsp_blc_pad, subtitle_txt)
+    fontsize(ax_rsp_blc_pad, 20, "points")
+    hold(ax_rsp_blc_pad, 'off')
+
     % Add plot to response over time graph (all pads in one)
-    plot(ax2, time_wndw_rmol, r_pad_wndw_blred_rmol, ...
+    plot(ax_rsp_v_t, time_wndw_rmol, r_pad_wndw_blred_rmol, ...
         DisplayName=['Pad ' num2str(pad)])
     
 
@@ -220,7 +239,7 @@ for pad = 7:12
     for step = 1:length(stp_i)
         max_rsp(step) = max(r_pad_wndw_blred_rmol(stp_i(step):stp_f(step)));   
     end
-    plot(ax1, noppm_stp_avg, max_rsp, '-.', DisplayName=['Pad ' num2str(pad)])
+    plot(ax_rsp_v_con, noppm_stp_avg, max_rsp, ':', DisplayName=['Pad ' num2str(pad)])
 end
 
 %% CUSTOM FUNCTIONS
