@@ -109,3 +109,15 @@ legend(ax_sg2, 'boxoff');
 fontsize(ax_sg2, 20, 'points');
 hold(ax_sg2, 'off');
 
+% Plotting injection x lines
+gas_type = SCUID_Test_Results(tgt_entry,1).GasType;
+for i = 1:length(SCUID_Test_Results(tgt_entry,1).InjectionTime)
+    time_inj = SCUID_Test_Results(tgt_entry,1).InjectionTime(i,1);
+    time_inj_ue = convertTo(time_inj, 'posixtime');
+    xline_pos = time_inj_ue - SCUID_Test_Results(tgt_entry, 1).TimeUE(1);
+    for ax = [ax_rh ax_temp ax_p ax_sg1 ax_sg2]
+        display_name = strcat(gas_type, " Injection ", num2str(i));
+        xline(ax, xline_pos, '-', display_name, ...
+            FontSize=20, HandleVisibility='off')
+    end
+end
