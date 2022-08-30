@@ -58,7 +58,7 @@ hold(ax_temp, 'on');
 plot(ax_temp, ts, SCUID_Test_Results(tgt_entry,1).Temp0, 'DisplayName', ...
     'Temperature 0');
 plot(ax_temp, ts, SCUID_Test_Results(tgt_entry,1).Temp1, 'DisplayName', ...
-    'Temperature 1');
+    'Temperature 1', LineWidth=2);
 xlabel(ax_temp, 'Time [s]');
 ylabel(ax_temp, ['Temperature [' char(176) 'C]']);
 legend(ax_temp, 'boxoff');
@@ -66,7 +66,20 @@ fontsize(ax_temp, 20, 'points');
 hold(ax_temp, 'off')
 
 % Pressure Plot
-%fig_p = figure('Name', 'Pressure');
+fig_p = figure('Name', 'Pressure');
+fig_p.WindowState = figure_state;
+tiledlayout(1,1);
+ax_p = nexttile;
+hold(ax_p, 'on');
+plot(ax_p, ts, SCUID_Test_Results(tgt_entry,1).P0, 'DisplayName', ...
+    'Pressure 0');
+plot(ax_p, ts, SCUID_Test_Results(tgt_entry,1).P1, 'DisplayName', ...
+    'Pressure 1', LineWidth=2);
+xlabel(ax_p, 'Time [s]');
+ylabel(ax_p, 'Pressure [mBar]');
+legend(ax_p, 'boxoff');
+fontsize(ax_p, 20, 'points');
+hold(ax_p, 'off')
 
 % Sensors 1-6 Plot
 fig_sg1 = figure('Name', 'Sensors 1-6');
