@@ -27,11 +27,7 @@ minimize_figures = false;
 
 %% Initialization
 % Setting figure state variable
-if minimize_figures == true
-    figure_state = "minimized";
-else
-    figure_state = "normal";
-end
+fig_pos = [200,200,2100,900];
 
 %% Loading Data
 load("CNT_Results_NO.mat")
@@ -44,11 +40,40 @@ target_result = CNT_Results_NO(target_entry,1);
 ts = target_result.timeE - target_result.timeE(1);
 ts_range = find(ts >= t_i & ts <= t_f);
 
+%% Concentration Data Clean-up
+noppm_clean = hampel(target_result.noppm, 15);
+
+
+
 %% Plotting
-plot(ts, movmean(target_result.r(:,7),15))
-plot(ts(ts_range), movmean(target_result.r(ts_range,7), 15))
+% FULL Raw signal + concentration
+fig_rsp_raw = figure('Name', 'Raw Data & Concentration vs. Time');
+fig_rsp_raw.Position = fig_pos;
+tiledlayout(1,1);
+ax_rsp_raw = nexttile;
+hold(ax_rsp_raw, "on");
+fontsize(ax_rsp_raw, 20, "points");
+xlabel(ax_rsp_raw, "Time [s]");
+box off;
+% Left y axis for response
+yyaxis(ax_rsp_raw, "left");
+for pad=7:12
+    plot(ax_rsp_raw, ts, target_result.r(:,pad), ...
+        DisplayName=strcat("Pad ", num2str(pad)),LineWidth=2);
+end
+colororder(ax_rsp_raw, 'default');
+ylabel(ax_rsp_raw, "Response [UNIT]");
+% Right y axis for concentration
+yyaxis(ax_rsp_raw, "right");
+plot(ax_rsp_raw, ts, noppm_clean, DisplayName='NO Concentration',Color="k");
+ylabel(ax_rsp_raw, "NO Concentration [ppm]");
+legend(ax_rsp_raw, Location='northeast', EdgeColor='none');
+
+% Relative humidity + temperature
+
 
 %% Custom Functions
+% Find the desired entry in the struct
 function target_entry = get_target_entry(Data_Struct, target_date, target_chip)
     for entry = 1:length(Data_Struct)
         if isempty(Data_Struct(entry,1).testdateM)
@@ -60,4 +85,34 @@ function target_entry = get_target_entry(Data_Struct, target_date, target_chip)
             end
         end
     end
+end
+% Detect Start of Exposure
+function start_indices = detect_start(noppm)
+    start_indices = [];
+    for i = 16:length(noppm)-15
+        if noppm(i) ~= 0
+            if noppm(i-15:i-1) ==0
+                if noppm(i+1:i+15) ~= 0
+                    start_indices = [start_indices; i];
+                end
+            end
+        end
+    end
+    disp('Found the start of exposures at the following indices:');
+    disp(start_indices)
+end
+% Detect End of Exposure
+function end_indices = detect_end(noppm)
+    end_indices = [];
+    for i = 16:length(noppm)-15
+        if noppm(i) == 0
+%             if noppm(i+1:i+15) ==0
+                if noppm(i-15:i-1) ~= 0
+                    end_indices = [end_indices; i];
+                end
+%             end
+        end
+    end
+    disp('Found the end of exposures at the following indices:');
+    disp(end_indices)
 end
