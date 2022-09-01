@@ -31,18 +31,24 @@ fig_pos = [200,200,fig_size];
 
 %% Loading Data
 load("CNT_Results_NO.mat")
-
+% Finding entry in struct according to given date & chip
 target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
-
 this_result = CNT_Results_NO(target_entry,1);
 
-%% Getting Time Stamps
+%% Data Processing
+% Getting Time Stamps
 ts = this_result.timeE - this_result.timeE(1);
 ts_range = find(ts >= t_i & ts <= t_f);
 
-%% Concentration Data Clean-up
+% Concentration Data Clean-up
 noppm_clean = hampel(this_result.noppm,15);
 
+% Separating the entire data into individual runs
+num_runs = 3;
+run_length = 3000;
+for run = 1:num_runs
+    
+end
 
 
 %% Plotting
@@ -106,7 +112,7 @@ legend(ax_rsp_raw,'NumColumns',2);
 % Response vs Concentration (Pads 7-12,Each Run)
 
 
-%% Overall plot format settings
+%% Overall Plot Format Settings
 all_figs = findall(groot,'type','figure');
 all_axes = findall(all_figs,'type','axes');
 set(all_axes,'FontSize',20, 'box','off')
