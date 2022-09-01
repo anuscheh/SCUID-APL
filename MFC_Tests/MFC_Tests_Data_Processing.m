@@ -18,79 +18,109 @@ t_i = 6000;
 t_f = 10000;
 
 % - Automatically find gas exposure ranges from gas concentration readings.
-%   If set to false, also specify the desired length in seconds.
+%   If set to false,also specify the desired length in seconds.
 auto_expo_range = false;
 expo_length = 180;
 
-% - Hide/Show Figures:
-minimize_figures = false;
+% - Figure size
+fig_size = [1400,600]; % 21:9 aspect ratio
 
 %% Initialization
 % Setting figure state variable
-fig_pos = [200,200,2100,900];
+fig_pos = [200,200,fig_size];
 
 %% Loading Data
 load("CNT_Results_NO.mat")
 
-target_entry = get_target_entry(CNT_Results_NO, target_date, target_chip);
+target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
 
-target_result = CNT_Results_NO(target_entry,1);
+this_result = CNT_Results_NO(target_entry,1);
 
 %% Getting Time Stamps
-ts = target_result.timeE - target_result.timeE(1);
+ts = this_result.timeE - this_result.timeE(1);
 ts_range = find(ts >= t_i & ts <= t_f);
 
 %% Concentration Data Clean-up
-noppm_clean = hampel(target_result.noppm, 15);
+noppm_clean = hampel(this_result.noppm,15);
 
 
 
 %% Plotting
-% Raw Signal + Concentration vs Time (Entire Test)
-fig_rsp_raw = figure('Name', 'Raw Data & Concentration vs. Time');
+% RH + Board Temp vs Time (Full)
+fig_rh_temp = figure('Name','Relative Humidity & Board Temp vs Time');
+fig_rh_temp.Position = fig_pos;
+tiledlayout(1,1);
+ax_rh_temp = nexttile;
+hold(ax_rh_temp,"on");
+xlabel(ax_rh_temp,"Time [s]");
+legend(ax_rh_temp);
+colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
+% Temp on left y axis
+yyaxis("left");
+plot(ax_rh_temp,ts,movmean(this_result.boardtemp,15),DisplayName="Board Temperature");
+ylabel(strcat("Temperature [",char(176),"C]"));
+% RH on right y axis
+yyaxis("right");
+plot(ax_rh_temp,ts,this_result.rh,DisplayName="Relative Humidity");
+ylabel("Relative Humidity [%]");
+hold(ax_rh_temp,"off");
+
+% Board Temp + BME Temp vs Time (Full)
+fig_temp_temp = figure('Name','Board Temp & BME Temp');
+fig_temp_temp.Position = fig_pos;
+tiledlayout(1,1);
+ax_temp_temp = nexttile;
+hold(ax_temp_temp,"on");
+xlabel(ax_temp_temp,"Time [s]");
+ylabel(strcat("Temperature [",char(176),"C]"));
+legend(ax_temp_temp);
+plot(ax_temp_temp,ts,movmean(this_result.boardtemp,15),DisplayName="Board Temperature");
+plot(ax_temp_temp,ts,this_result.bmetemp,DisplayName="BME Temperature");
+hold(ax_temp_temp,"off");
+
+% Normalized Signal + Concentration vs Time (Full)
+fig_rsp_raw = figure('Name','Raw Data & Concentration vs Time');
 fig_rsp_raw.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_raw = nexttile;
-hold(ax_rsp_raw, "on");
-fontsize(ax_rsp_raw, 20, "points");
-xlabel(ax_rsp_raw, "Time [s]");
-box off;
+hold(ax_rsp_raw,"on");
+xlabel(ax_rsp_raw,"Time [s]");
 % Left y axis for response
-yyaxis(ax_rsp_raw, "left");
+yyaxis(ax_rsp_raw,"left");
 for pad=7:12
-    plot(ax_rsp_raw, ts, target_result.r(:,pad), ...
-        DisplayName=strcat("Pad ", num2str(pad)),LineWidth=2);
+    plot(ax_rsp_raw,ts,this_result.r(:,pad),...
+        DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
-colororder(ax_rsp_raw, 'default');
-ylabel(ax_rsp_raw, "Response [UNIT]");
+colororder(ax_rsp_raw,'default');
+ylabel(ax_rsp_raw,"Response [UNIT]");
 % Right y axis for concentration
-yyaxis(ax_rsp_raw, "right");
-plot(ax_rsp_raw, ts, noppm_clean, DisplayName='NO Concentration',Color="k");
-ylabel(ax_rsp_raw, "NO Concentration [ppm]");
-legend(ax_rsp_raw, Location='northeast', EdgeColor='none');
+yyaxis(ax_rsp_raw,"right");
+plot(ax_rsp_raw,ts,noppm_clean,DisplayName='NO Concentration',Color="k");
+ylabel(ax_rsp_raw,"NO Concentration [ppm]");
+legend(ax_rsp_raw,'NumColumns',2);
 
-% Raw Signal + Concentration vs Time (One Run)
+% Normalized Signal + Concentration vs Time (One Run,Pick Run 2,)
 
-% Relative Humidity + Temperature vs Time (Entire Test)
+% Baseline Corrected Signal + Concentration vs Time (Each Run)
 
-% Relative Humidity + Temperature vs Time (One Run)
+% Response vs Concentration (Pads 7-12,Each Run)
 
-% Normalized Signal + Concentration vs Time (One Run)
 
-% Baseline Corrected Signal + Concentration vs Time (One Run)
-
-% Response vs Concentration (Pads 7-12, One Run)
-
-% Response vs Concentration (One Pad, Three Runs)
+%% Overall plot format settings
+all_figs = findall(groot,'type','figure');
+all_axes = findall(all_figs,'type','axes');
+set(all_axes,'FontSize',20, 'box','off')
+all_lgds = findall(all_figs,'type','legend');
+set(all_lgds,'edgecolor','none', 'location','northeast');
 
 
 %% Custom Functions
 % Find the desired entry in the struct
-function target_entry = get_target_entry(Data_Struct, target_date, target_chip)
+function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
     for entry = 1:length(Data_Struct)
         if isempty(Data_Struct(entry,1).testdateM)
             continue
-        elseif contains(datestr(Data_Struct(entry,1).testdateM), datestr(target_date))
+        elseif contains(datestr(Data_Struct(entry,1).testdateM),datestr(target_date))
             if Data_Struct(entry,1).chip == target_chip
                 target_entry = entry;
                 break
