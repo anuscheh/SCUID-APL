@@ -46,7 +46,7 @@ noppm_clean = hampel(target_result.noppm, 15);
 
 
 %% Plotting
-% FULL Raw signal + concentration
+% Raw Signal + Concentration vs Time (Entire Test)
 fig_rsp_raw = figure('Name', 'Raw Data & Concentration vs. Time');
 fig_rsp_raw.Position = fig_pos;
 tiledlayout(1,1);
@@ -69,7 +69,19 @@ plot(ax_rsp_raw, ts, noppm_clean, DisplayName='NO Concentration',Color="k");
 ylabel(ax_rsp_raw, "NO Concentration [ppm]");
 legend(ax_rsp_raw, Location='northeast', EdgeColor='none');
 
-% Relative humidity + temperature
+% Raw Signal + Concentration vs Time (One Run)
+
+% Relative Humidity + Temperature vs Time (Entire Test)
+
+% Relative Humidity + Temperature vs Time (One Run)
+
+% Normalized Signal + Concentration vs Time (One Run)
+
+% Baseline Corrected Signal + Concentration vs Time (One Run)
+
+% Response vs Concentration (Pads 7-12, One Run)
+
+% Response vs Concentration (One Pad, Three Runs)
 
 
 %% Custom Functions
