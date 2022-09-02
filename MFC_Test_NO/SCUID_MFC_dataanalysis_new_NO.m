@@ -1,14 +1,14 @@
 % this program adds test run data to the CNT_Results.mat
 
 close all;clear all; % clean your workspace first becuase you can import data into an exisint structe and overwrite it... bad
-selpath='/Users/anuschehnawaz/Documents/MATLAB/SCUID_NO'; % you secify where you're at
+selpath='/Users/cyano/Documents/GitHub/SCUID-APL/MFC_Tests'; % you secify where you're at
 cd(selpath);
 
 %_________________________
 %% Enter data 
-%date and info
-addinfo = "6/28/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
-chip = 5; %enter chip number (E.G. 1 for AMES1, etc.)
+% date and info
+addinfo = "09/01/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
+chip = 1; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
 % MFC0 - what gas bottle is connected?
