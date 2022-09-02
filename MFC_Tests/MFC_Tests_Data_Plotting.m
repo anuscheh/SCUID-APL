@@ -9,9 +9,9 @@ clear; close all; clc;
 % These are settings that are meant to be changed by the user according to 
 % needs. 
 % - Test Date
-target_date = datetime("2022-07-11","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-01","Format","uuuu-MM-dd");
 % - Target Chip
-target_chip = 3;
+target_chip = 4;
 
 % Time window settings
 t_i = 6000;
@@ -63,7 +63,7 @@ legend(ax_rh_temp);
 colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
-plot(ax_rh_temp,ts,movmean(this_result.boardtemp,15),DisplayName="Board Temperature");
+plot(ax_rh_temp,ts,this_result.boardtemp,DisplayName="Board Temperature");
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
@@ -80,7 +80,7 @@ hold(ax_temp_temp,"on");
 xlabel(ax_temp_temp,"Time [s]");
 ylabel(strcat("Temperature [",char(176),"C]"));
 legend(ax_temp_temp);
-plot(ax_temp_temp,ts,movmean(this_result.boardtemp,15),DisplayName="Board Temperature");
+plot(ax_temp_temp,ts,this_result.boardtemp,DisplayName="Board Temperature");
 plot(ax_temp_temp,ts,this_result.bmetemp,DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
 
