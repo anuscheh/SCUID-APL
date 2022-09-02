@@ -22,7 +22,7 @@ auto_save = false;
 load('SCUID_Test_Results.mat')
 
 % Change this date to the date of test you want
-test_date = datetime('2022-08-10');
+test_date = datetime('2022-09-01');
 
 for entry = 1:length(SCUID_Test_Results)
     if SCUID_Test_Results(entry,1).TestDate == test_date
