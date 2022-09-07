@@ -2,10 +2,8 @@
 % Author: Jerry Chen
 % Date Created: 8/31/2022
 % Last Updated: 8/31/2022
-%% 
 
 clear; close all; clc;
-
 %% Settings
 % These are settings that are meant to be changed by the user according to 
 % needs. 
@@ -150,28 +148,53 @@ plot(ax_temp_temp,ts,entry_result.bmetemp,DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
 
 % Normalized Signal + Concentration vs Time (Full)
-fig_rsp_raw = figure('Name','Raw Data & Concentration vs Time');
-fig_rsp_raw.Position = fig_pos;
+fig_rsp_norm = figure('Name','Normalized Data & Concentration vs Time');
+fig_rsp_norm.Position = fig_pos;
 tiledlayout(1,1);
-ax_rsp_raw = nexttile;
-hold(ax_rsp_raw,"on");
-xlabel(ax_rsp_raw,"Time [s]");
+ax_rsp_norm = nexttile;
+hold(ax_rsp_norm,"on");
+xlabel(ax_rsp_norm,"Time [s]");
 % Left y axis for response
-yyaxis(ax_rsp_raw,"left");
+yyaxis(ax_rsp_norm,"left");
 for pad = target_pads
     r0 = entry_result.r(stp_i(1,1)-5,pad);
-    plot(ax_rsp_raw,ts,entry_result.r(:,pad)/r0,...
+    plot(ax_rsp_norm,ts,entry_result.r(:,pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
-colororder(ax_rsp_raw,'default');
-ylabel(ax_rsp_raw,"R/R_0");
+colororder(ax_rsp_norm,'default');
+ylabel(ax_rsp_norm,"R/R_0");
 % Right y axis for concentration
-yyaxis(ax_rsp_raw,"right");
-plot(ax_rsp_raw,ts,conc_clean,DisplayName='NO Concentration',Color="k");
-ylabel(ax_rsp_raw,"NO Concentration [ppm]");
-legend(ax_rsp_raw,'NumColumns',2);
+yyaxis(ax_rsp_norm,"right");
+plot(ax_rsp_norm,ts,conc_clean,DisplayName='NO Concentration',Color="k");
+ylabel(ax_rsp_norm,"NO Concentration [ppm]");
+legend(ax_rsp_norm,'NumColumns',2);
 
-% Normalized Signal + Concentration vs Time (One Run,Pick Run 2,)
+% Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
+run_pick = 2;
+fig_rsp_run_norm = figure('Name', "Normalized Data & Concentration " + ...
+    "vs Time - Run " + num2str(run_pick));
+fig_rsp_run_norm.Position = fig_pos;
+tiledlayout(1,1);
+ax_rsp_run_norm = nexttile;
+hold(ax_rsp_run_norm,"on");
+xlabel(ax_rsp_run_norm,"Time [s]");
+% Left y axis for response
+yyaxis(ax_rsp_run_norm,"left");
+for pad = target_pads
+    r0 = entry_result.r(stp_i(1,run_pick)-5,pad);
+    plot(ax_rsp_run_norm,ts(run_ranges{run_pick}), ...
+        entry_result.r(run_ranges{run_pick},pad)/r0,...
+        DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
+end
+colororder(ax_rsp_run_norm,'default');
+ylabel(ax_rsp_run_norm,"R/R_0");
+% Right y axis for concentration
+yyaxis(ax_rsp_run_norm,"right");
+plot(ax_rsp_run_norm,ts(run_ranges{run_pick}), ...
+    conc_clean(run_ranges{run_pick}),DisplayName='NO Concentration',Color="k");
+ylabel(ax_rsp_run_norm,"NO Concentration [ppm]");
+legend(ax_rsp_run_norm,'NumColumns',2);
+
 
 % Baseline Corrected Signal + Concentration vs Time (Each Run)
 fig_rsp_blc = gobjects(num_runs,1);
@@ -184,11 +207,19 @@ for run = 1:num_runs
     ax_rsp_blc = nexttile;
     hold(ax_rsp_blc,"on");
     xlabel(ax_rsp_blc,"Time [s]");
-    ylabel(ax_rsp_blc,"R/R_0")
+    % Left y axis for response
+    yyaxis(ax_rsp_blc,"left");    
     for pad = target_pads
         plot(ax_rsp_blc,ts(run_ranges{run,1}),r_blc(run_ranges{run,1}, pad), ...
-            DisplayName=strcat("Pad ",num2str(pad)));
+            DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
+    colororder(ax_rsp_blc,"default")
+    ylabel(ax_rsp_blc,"R/R_0")
+    % Right y axis for concentration
+    yyaxis(ax_rsp_blc,"right")
+    plot(ax_rsp_blc,ts(run_ranges{run}),conc_clean(run_ranges{run}), ...
+        DisplayName='NO Concentration',Color="k",LineStyle="--");
+    ylabel(ax_rsp_blc,"NO Concentration [ppm]");
     legend(ax_rsp_blc,'NumColumns',2)
     hold(ax_rsp_blc,"off")
 end

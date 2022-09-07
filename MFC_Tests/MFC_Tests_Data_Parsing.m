@@ -27,7 +27,7 @@ load('CNT_Results_NO.mat') %all data is in here
 
 % Select .dat file to be loaded in
 disp('What .dat file should be read and stored in the .mat file?');
-[file2,path2] = uigetfile('.dat')  % find dat file to add to struct
+[file2,path2] = uigetfile('.dat');  % find dat file to add to struct
 
 %% harvest contents of the dat file
 %Strip data(numbers) from .dat file
