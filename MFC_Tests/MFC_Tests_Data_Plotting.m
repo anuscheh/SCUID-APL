@@ -2,10 +2,8 @@
 % Author: Jerry Chen
 % Date Created: 8/31/2022
 % Last Updated: 8/31/2022
-%% 
 
 clear; close all; clc;
-
 %% Settings
 % These are settings that are meant to be changed by the user according to 
 % needs. 
