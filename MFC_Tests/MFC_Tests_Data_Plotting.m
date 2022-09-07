@@ -129,6 +129,7 @@ colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
 plot(ax_rh_temp,ts,entry_result.boardtemp,DisplayName="Board Temperature");
+ylim([30,37])
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
@@ -145,9 +146,12 @@ hold(ax_temp_temp,"on");
 xlabel(ax_temp_temp,"Time [s]");
 ylabel(strcat("Temperature [",char(176),"C]"));
 legend(ax_temp_temp);
-plot(ax_temp_temp,ts,entry_result.boardtemp,DisplayName="Board Temperature");
-plot(ax_temp_temp,ts,entry_result.bmetemp,DisplayName="BME Temperature");
+plot(ax_temp_temp,ts,entry_result.boardtemp,LineWidth=2, ...
+    DisplayName="Board Temperature");
+plot(ax_temp_temp,ts,entry_result.bmetemp,LineWidth=2, ...
+    DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
+ylim([30,37])
 
 % Normalized Signal + Concentration vs Time (Full)
 fig_rsp_norm = figure('Name','Normalized Data & Concentration vs Time');
@@ -164,7 +168,7 @@ for pad = target_pads
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
 colororder(ax_rsp_norm,'default');
-ylabel(ax_rsp_norm,"R/R_0");
+ylabel(ax_rsp_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_norm,"right");
 plot(ax_rsp_norm,ts,conc_clean,DisplayName='NO Concentration',Color="k");
@@ -189,11 +193,12 @@ for pad = target_pads
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
 colororder(ax_rsp_run_norm,'default');
-ylabel(ax_rsp_run_norm,"R/R_0");
+ylabel(ax_rsp_run_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_run_norm,"right");
 plot(ax_rsp_run_norm,ts(run_ranges{run_pick}), ...
-    conc_clean(run_ranges{run_pick}),DisplayName='NO Concentration',Color="k");
+    conc_clean(run_ranges{run_pick}),DisplayName='NO Concentration', ...
+    Color="k",LineStyle=":");
 ylabel(ax_rsp_run_norm,"NO Concentration [ppm]");
 legend(ax_rsp_run_norm,'NumColumns',2);
 
@@ -216,15 +221,18 @@ for run = 1:num_runs
             DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
     colororder(ax_rsp_blc,"default")
-    ylabel(ax_rsp_blc,"R/R_0")
+    ylabel(ax_rsp_blc,"R/R_0 [-]")
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
     plot(ax_rsp_blc,ts(run_ranges{run}),conc_clean(run_ranges{run}), ...
-        DisplayName='NO Concentration',Color="k",LineStyle="--");
+        DisplayName='NO Concentration',Color="k",LineStyle=":");
     ylabel(ax_rsp_blc,"NO Concentration [ppm]");
     legend(ax_rsp_blc,'NumColumns',2)
     hold(ax_rsp_blc,"off")
 end
+
+% all_figs = findall(groot,'type','figure');
+% all_axes = findall(all_figs,'type','axes');
 
 
 % Response vs Concentration (Pads 7-12,Each Run)
@@ -238,28 +246,33 @@ for run = 1:num_runs
     ax_rvc = nexttile;
     hold(ax_rvc,"on");
     xlabel(ax_rvc,"Concentration [ppm]");
-    ylabel(ax_rvc,"R/R_0")
+    ylabel(ax_rvc,"R/R_0 [-]")
     
     for pad = target_pads
-        plot(ax_rvc,conc_stp_avg(:,run), r_samples(:,run,pad),':o',...
+        plot(ax_rvc,conc_stp_avg(:,run), r_samples(:,run,pad),':.',...
             DisplayName=strcat("Pad ",num2str(pad)));
     end
     legend(ax_rvc,'NumColumns',2)
     hold(ax_rvc,"off")
 end
 
-% r_samples = zeros(stp_f);
-% for run = 1:num_runs
-%     for step = 1:num_steps
-%         r_samples(step,run) = 
 
 %% Overall Plot Format Settings
 all_figs = findall(groot,'type','figure');
 all_axes = findall(all_figs,'type','axes');
+all_lines = findall(all_figs,'Type','Line');
 set(all_axes,'FontSize',20, 'box','off')
 all_lgds = findall(all_figs,'type','legend');
 set(all_lgds,'edgecolor','none', 'location','northeast');
-
+set(all_lines, 'LineWidth',2, 'MarkerSize',36);
+% Setting all the y-axes to black
+for i = 1:length(all_axes)
+    ax = all_axes(i);
+    disp(length(ax.YAxis))
+    for j = 1:length(ax.YAxis)
+        ax.YAxis(j).Color = 'k';
+    end
+end
 
 %% Custom Functions
 % Find the desired entry in the struct
