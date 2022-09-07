@@ -8,7 +8,7 @@ clear; close all; clc;
 % These are settings that are meant to be changed by the user according to 
 % needs. 
 % - Test Date
-target_date = datetime("2022-09-01","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-06","Format","uuuu-MM-dd");
 % - Target Chip
 target_chip = 4;
 % - Pads info
@@ -20,6 +20,7 @@ num_runs = 3;
 num_steps = 7; % number of steps per run
 run_length = 6600;
 step_length = 600;
+prepurge = 600;
 
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
@@ -57,7 +58,7 @@ end
 run_ranges{num_runs} = find(ts >= (num_runs-1)*6600);
 
 % Auto detecting start and end of exposure steps
-stp_i = detect_start(conc_clean,ts,step_length);
+stp_i = detect_start(conc_clean,ts,step_length, prepurge);
 stp_f = zeros(size(stp_i));
 if auto_expo_range
     stp_f = detect_end(conc_clean);
@@ -67,6 +68,12 @@ else
         stp_f(stp) = end_ind;
     end
 end
+
+if size(stp_i,1) * size(stp_i,2) ~= num_steps*num_runs
+    disp("Error: failed to get the corretc total number of steps!")
+    return
+end
+
 % Reshaping these vectors into [run by step] matrices for easier use.
 stp_i = reshape(stp_i,num_steps,num_runs);
 stp_f = reshape(stp_f,num_steps,num_runs);
@@ -121,17 +128,17 @@ fig_rh_temp.Position = fig_pos;
 tiledlayout(1,1);
 ax_rh_temp = nexttile;
 hold(ax_rh_temp,"on");
-xlabel(ax_rh_temp,"Time [s]");
+xlabel(ax_rh_temp,"Time [h]");
 legend(ax_rh_temp);
 colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
-plot(ax_rh_temp,ts,entry_result.boardtemp,DisplayName="Board Temperature");
-ylim([30,37])
+plot(ax_rh_temp,ts./3600,entry_result.boardtemp,DisplayName="Board Temperature");
+% ylim([30,37])
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
-plot(ax_rh_temp,ts,entry_result.rh,DisplayName="Relative Humidity");
+plot(ax_rh_temp,ts./3600,entry_result.rh,DisplayName="Relative Humidity");
 ylabel("Relative Humidity [%]");
 hold(ax_rh_temp,"off");
 
@@ -141,15 +148,15 @@ fig_temp_temp.Position = fig_pos;
 tiledlayout(1,1);
 ax_temp_temp = nexttile;
 hold(ax_temp_temp,"on");
-xlabel(ax_temp_temp,"Time [s]");
+xlabel(ax_temp_temp,"Time [h]");
 ylabel(strcat("Temperature [",char(176),"C]"));
 legend(ax_temp_temp);
-plot(ax_temp_temp,ts,entry_result.boardtemp,LineWidth=2, ...
+plot(ax_temp_temp,ts./3600,entry_result.boardtemp,LineWidth=2, ...
     DisplayName="Board Temperature");
-plot(ax_temp_temp,ts,entry_result.bmetemp,LineWidth=2, ...
+plot(ax_temp_temp,ts./3600,entry_result.bmetemp,LineWidth=2, ...
     DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
-ylim([30,37])
+% ylim([30,37])
 
 % Normalized Signal + Concentration vs Time (Full)
 fig_rsp_norm = figure('Name','Normalized Data & Concentration vs Time');
@@ -157,19 +164,19 @@ fig_rsp_norm.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_norm = nexttile;
 hold(ax_rsp_norm,"on");
-xlabel(ax_rsp_norm,"Time [s]");
+xlabel(ax_rsp_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_norm,"left");
 for pad = target_pads
     r0 = entry_result.r(stp_i(1,1)-5,pad);
-    plot(ax_rsp_norm,ts,entry_result.r(:,pad)/r0,...
+    plot(ax_rsp_norm,ts./3600,entry_result.r(:,pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
 colororder(ax_rsp_norm,'default');
 ylabel(ax_rsp_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_norm,"right");
-plot(ax_rsp_norm,ts,conc_clean,DisplayName='NO Concentration',Color="k");
+plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName='NO Concentration',Color="k");
 ylabel(ax_rsp_norm,"NO Concentration [ppm]");
 legend(ax_rsp_norm,'NumColumns',2);
 
@@ -181,12 +188,12 @@ fig_rsp_run_norm.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_run_norm = nexttile;
 hold(ax_rsp_run_norm,"on");
-xlabel(ax_rsp_run_norm,"Time [s]");
+xlabel(ax_rsp_run_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_run_norm,"left");
 for pad = target_pads
     r0 = entry_result.r(stp_i(1,run_pick)-5,pad);
-    plot(ax_rsp_run_norm,ts(run_ranges{run_pick}), ...
+    plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
         entry_result.r(run_ranges{run_pick},pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
@@ -194,7 +201,7 @@ colororder(ax_rsp_run_norm,'default');
 ylabel(ax_rsp_run_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_run_norm,"right");
-plot(ax_rsp_run_norm,ts(run_ranges{run_pick}), ...
+plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
     conc_clean(run_ranges{run_pick}),DisplayName='NO Concentration', ...
     Color="k",LineStyle=":");
 ylabel(ax_rsp_run_norm,"NO Concentration [ppm]");
@@ -211,18 +218,18 @@ for run = 1:num_runs
     tiledlayout(1,1);
     ax_rsp_blc = nexttile;
     hold(ax_rsp_blc,"on");
-    xlabel(ax_rsp_blc,"Time [s]");
+    xlabel(ax_rsp_blc,"Time [h]");
     % Left y axis for response
     yyaxis(ax_rsp_blc,"left");    
     for pad = target_pads
-        plot(ax_rsp_blc,ts(run_ranges{run,1}),r_blc(run_ranges{run,1}, pad), ...
+        plot(ax_rsp_blc,ts(run_ranges{run,1})./3600,r_blc(run_ranges{run,1}, pad), ...
             DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
     colororder(ax_rsp_blc,"default")
     ylabel(ax_rsp_blc,"R/R_0 [-]")
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
-    plot(ax_rsp_blc,ts(run_ranges{run}),conc_clean(run_ranges{run}), ...
+    plot(ax_rsp_blc,ts(run_ranges{run})./3600,conc_clean(run_ranges{run}), ...
         DisplayName='NO Concentration',Color="k",LineStyle=":");
     ylabel(ax_rsp_blc,"NO Concentration [ppm]");
     legend(ax_rsp_blc,'NumColumns',2)
@@ -288,7 +295,7 @@ function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
 end
 
 % Detect Start of Exposure
-function start_indices = detect_start(conc, time_stamp, step_length)
+function start_indices = detect_start(conc, time_stamp, step_length, prepurge)
     start_indices = [];
     for i = 16:length(conc)-15
         if conc(i) ~= 0
@@ -315,6 +322,8 @@ function start_indices = detect_start(conc, time_stamp, step_length)
     start_indices(find(separations<step_length)+1) = [];
 %     disp("Fixed start indices:")
 %     disp(start_indices)
+%     disp(start_times)
+    start_indices(start_times < prepurge) = [];
 end
 
 % Detect End of Exposure
