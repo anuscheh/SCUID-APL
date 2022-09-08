@@ -7,7 +7,7 @@ cd(selpath);
 %_________________________
 %% Enter data 
 % date and info
-addinfo = "09/06/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
+addinfo = "09/07/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
 chip = 1; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
