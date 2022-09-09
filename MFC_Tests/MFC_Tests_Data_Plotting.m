@@ -4,17 +4,15 @@
 % Last Updated: 8/31/2022
 
 clear; close all; clc;
-%% Settings
-% These are settings that are meant to be changed by the user according to 
-% needs. 
+
+%% BASIC TEST INFORMATION
 % - Test Date
 target_date = datetime("2022-09-07","Format","uuuu-MM-dd");
 % - Target Chip
-target_chip = 4;
+target_chip = 1;
 % - Pads info
 num_pads = 12;
 target_pads = 7:12;
-
 % Time window settings
 num_runs = 3;
 num_steps = 7; % number of steps per run
@@ -22,16 +20,22 @@ run_length = 6600;
 step_length = 600;
 prepurge = 600;
 
-% Automatically detect rising edge of concentration data.
+%% DATA PROCESSING OPTIONS
+% - Automatically detect rising edge of concentration data.
 step_rise_auto_detect = false;
-
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
 sample_length = 180;
 
+% - Perform Moving Mean on data before normalization & baseline correction
+enable_movmean = true;
+
+%% PLOT SETTINGS
 % - Figure size
 fig_size = [1400,600]; % 21:9 aspect ratio
+% - Title Toggle
+enable_title = true;
 
 %% Initialization
 % Setting figure state variable
@@ -77,6 +81,7 @@ else
     end
 end
 
+% Checking total number of steps
 if size(stp_i,1) * size(stp_i,2) ~= num_steps*num_runs
     disp("Error: failed to get the corretc total number of steps!")
     return
@@ -93,8 +98,14 @@ else
     input("Unmatch!")
 end
 
+% Performing Moving Mean
+r = entry_result.r;
+if enable_movmean
+    r = movmean(r,15,1);
+end
+
 % Performing Baseline Correction for each run
-r_blc = size(entry_result.r);
+r_blc = r;
 for run = 1:num_runs
     % Time stamps for this run
     ts_run = ts(run_ranges{run,1});
@@ -105,8 +116,8 @@ for run = 1:num_runs
     for pad = target_pads
         % Finding baseline by fitting to part of response with no exposure
         X = ts_run(non_expo_indices);
-        r0_pad = entry_result.r(stp_i(1,run)-5,pad);
-        r_norm_pad = (entry_result.r(run_ranges{run,1},pad))/r0_pad;
+        r0_pad = r(stp_i(1,run)-5,pad);
+        r_norm_pad = (r(run_ranges{run,1},pad))/r0_pad;
         Y = r_norm_pad(non_expo_indices);
 %         Y_mean = mean(Y);
 %         Y_cen = Y - Y_mean;
@@ -144,13 +155,16 @@ colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
 plot(ax_rh_temp,ts./3600,entry_result.boardtemp,DisplayName="Board Temperature");
-% ylim([30,37])
+ylim([30,37])
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
 plot(ax_rh_temp,ts./3600,entry_result.rh,DisplayName="Relative Humidity");
 ylabel("Relative Humidity [%]");
 hold(ax_rh_temp,"off");
+if enable_title
+    title(ax_rh_temp,"Relative Humidity & Board Temperature vs Time");
+end
 
 % Board Temp + BME Temp vs Time (Full)
 fig_temp_temp = figure('Name','Board Temp & BME Temp');
@@ -166,7 +180,10 @@ plot(ax_temp_temp,ts./3600,entry_result.boardtemp,LineWidth=2, ...
 plot(ax_temp_temp,ts./3600,entry_result.bmetemp,LineWidth=2, ...
     DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
-% ylim([30,37])
+ylim([30,37])
+if enable_title
+    title(ax_temp_temp,"Board Temperature & BME Temperature vs Time");
+end
 
 % Normalized Signal + Concentration vs Time (Full)
 fig_rsp_norm = figure('Name','Normalized Data & Concentration vs Time');
@@ -178,8 +195,8 @@ xlabel(ax_rsp_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_norm,"left");
 for pad = target_pads
-    r0 = entry_result.r(stp_i(1,1)-5,pad);
-    plot(ax_rsp_norm,ts./3600,entry_result.r(:,pad)/r0,...
+    r0 = r(stp_i(1,1)-5,pad);
+    plot(ax_rsp_norm,ts./3600,r(:,pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
 colororder(ax_rsp_norm,'default');
@@ -190,6 +207,10 @@ plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName='NO Concentration', ...
     LineStyle=':',Color="k");
 ylabel(ax_rsp_norm,"NO Concentration [ppm]");
 legend(ax_rsp_norm,'NumColumns',2);
+if enable_title
+    title(ax_rsp_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
+        num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
+end
 
 % Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
 run_pick = 2;
@@ -203,9 +224,9 @@ xlabel(ax_rsp_run_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_run_norm,"left");
 for pad = target_pads
-    r0 = entry_result.r(stp_i(1,run_pick)-5,pad);
+    r0 = r(stp_i(1,run_pick)-5,pad);
     plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
-        entry_result.r(run_ranges{run_pick},pad)/r0,...
+        r(run_ranges{run_pick},pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
 colororder(ax_rsp_run_norm,'default');
@@ -217,6 +238,11 @@ plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
     Color="k",LineStyle=":");
 ylabel(ax_rsp_run_norm,"NO Concentration [ppm]");
 legend(ax_rsp_run_norm,'NumColumns',2);
+if enable_title
+    title(ax_rsp_run_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
+        num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
+end
+hold(ax_rsp_run_norm,"off")
 
 
 % Baseline Corrected Signal + Concentration vs Time (Each Run)
@@ -239,18 +265,21 @@ for run = 1:num_runs
     colororder(ax_rsp_blc,"default")
     yline(0,'k',HandleVisibility='off')
     ylabel(ax_rsp_blc,"R/R_0 [-]")
+    ylim(ax_rsp_blc, [-2e-3, 7e-3])
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
     plot(ax_rsp_blc,ts(run_ranges{run})./3600,conc_clean(run_ranges{run}), ...
         DisplayName='NO Concentration',Color="k",LineStyle=":");
     ylabel(ax_rsp_blc,"NO Concentration [ppm]");
+    ylim(ax_rsp_blc, [0, 2])
     legend(ax_rsp_blc,'NumColumns',2)
     hold(ax_rsp_blc,"off")
+    if enable_title
+    title(ax_rsp_blc, strcat("Normalized Sensor Response vs Time ", ...
+        "- Run ", num2str(run), " (Pads ", ...
+        num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
+    end
 end
-
-% all_figs = findall(groot,'type','figure');
-% all_axes = findall(all_figs,'type','axes');
-
 
 % Response vs Concentration (Pads 7-12,Each Run)
 fig_rvc = gobjects(num_runs,1);
@@ -264,13 +293,18 @@ for run = 1:num_runs
     hold(ax_rvc,"on");
     xlabel(ax_rvc,"Concentration [ppm]");
     ylabel(ax_rvc,"R/R_0 [-]")
-    
+%     ylim(ax_rvc, [-2e-3, 7e-3])
     for pad = target_pads
         plot(ax_rvc,conc_stp_avg(:,run), r_samples(:,run,pad),':.',...
             DisplayName=strcat("Pad ",num2str(pad)));
     end
     legend(ax_rvc,'NumColumns',2)
     hold(ax_rvc,"off")
+    if enable_title
+    title(ax_rvc, strcat("Normalized Sensor Response vs Concentration ", ...
+        "- Run ", num2str(run), " (Pads ", ...
+        num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
+    end
 end
 
 
@@ -298,7 +332,7 @@ function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
         if isempty(Data_Struct(entry,1).testdateM)
             continue
         elseif contains(datestr(Data_Struct(entry,1).testdateM),datestr(target_date))
-            if Data_Struct(entry,1).chip == target_chip
+            if isequal(Data_Struct(entry,1).chip, target_chip)
                 target_entry = entry;
                 break
             else
