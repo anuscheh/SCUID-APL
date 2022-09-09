@@ -8,7 +8,7 @@ clear; close all; clc;
 % These are settings that are meant to be changed by the user according to 
 % needs. 
 % - Test Date
-target_date = datetime("2022-09-06","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-07","Format","uuuu-MM-dd");
 % - Target Chip
 target_chip = 4;
 % - Pads info
@@ -21,6 +21,9 @@ num_steps = 7; % number of steps per run
 run_length = 6600;
 step_length = 600;
 prepurge = 600;
+
+% Automatically detect rising edge of concentration data.
+step_rise_auto_detect = false;
 
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
@@ -45,7 +48,7 @@ entry_result = CNT_Results_NO(target_entry,1);
 ts = entry_result.timeE - entry_result.timeE(1);
 
 % Concentration Data Clean-up
-conc_clean = hampel(entry_result.noppm,15);
+conc_clean = hampel(entry_result.noppm,50);
 conc_clean(isnan(conc_clean)) = 0;
 
 % Separating the entire data into individual runs
@@ -57,8 +60,13 @@ for run = 1:num_runs-1
 end
 run_ranges{num_runs} = find(ts >= (num_runs-1)*6600);
 
-% Auto detecting start and end of exposure steps
-stp_i = detect_start(conc_clean,ts,step_length, prepurge);
+% Auto detecting start of exposure steps
+if step_rise_auto_detect
+    stp_i = detect_start(conc_clean,ts,step_length,prepurge);
+else
+    % Manually input rising edge index here!
+    stp_i = [1402,3052,4745,6451,8191,9913,11685,14338,15864,17520,19245,20995,22761,24495,27161,28729,30398,32099,33817,35592,37307];
+end
 stp_f = zeros(size(stp_i));
 if auto_expo_range
     stp_f = detect_end(conc_clean);
@@ -98,9 +106,11 @@ for run = 1:num_runs
         % Finding baseline by fitting to part of response with no exposure
         X = ts_run(non_expo_indices);
         r0_pad = entry_result.r(stp_i(1,run)-5,pad);
-        r_norm_pad = entry_result.r(run_ranges{run,1},pad)/r0_pad;
+        r_norm_pad = (entry_result.r(run_ranges{run,1},pad))/r0_pad;
         Y = r_norm_pad(non_expo_indices);
-        [r_fit_pad, gof] = fit(X, Y, 'exp1');
+%         Y_mean = mean(Y);
+%         Y_cen = Y - Y_mean;
+        [r_fit_pad, gof] = fit(X,Y,'poly5');
         baseline_pad = r_fit_pad(ts_run);
         % Subtracting baseline from original response data
         r_blc(run_ranges{run,1},pad) = r_norm_pad - baseline_pad;
@@ -176,7 +186,8 @@ colororder(ax_rsp_norm,'default');
 ylabel(ax_rsp_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_norm,"right");
-plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName='NO Concentration',Color="k");
+plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName='NO Concentration', ...
+    LineStyle=':',Color="k");
 ylabel(ax_rsp_norm,"NO Concentration [ppm]");
 legend(ax_rsp_norm,'NumColumns',2);
 
@@ -226,6 +237,7 @@ for run = 1:num_runs
             DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
     colororder(ax_rsp_blc,"default")
+    yline(0,'k',HandleVisibility='off')
     ylabel(ax_rsp_blc,"R/R_0 [-]")
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
@@ -273,7 +285,7 @@ set(all_lines, 'LineWidth',2, 'MarkerSize',36);
 % Setting all the y-axes to black
 for i = 1:length(all_axes)
     ax = all_axes(i);
-    disp(length(ax.YAxis))
+%     disp(length(ax.YAxis))
     for j = 1:length(ax.YAxis)
         ax.YAxis(j).Color = 'k';
     end
@@ -289,6 +301,8 @@ function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
             if Data_Struct(entry,1).chip == target_chip
                 target_entry = entry;
                 break
+            else
+                continue
             end
         end
     end
