@@ -7,7 +7,7 @@ cd(selpath);
 %_________________________
 %% Enter data 
 % date and info
-addinfo = "09/07/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
+addinfo = "09/0/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
 chip = 1; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
@@ -16,7 +16,7 @@ gas1 = "NO";
 Gas1Conc = 104;%12.5;%104;[ppm] in gas bottle (source)
 
 % MFC1 - what gas bottle is connected?
-gas2 = "NO";
+gas2 = "N2O";
 Gas2Conc = 12.9;
 
 %% load data files and struct ==================================================================
