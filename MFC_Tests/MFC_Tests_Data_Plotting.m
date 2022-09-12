@@ -7,9 +7,9 @@ clear; close all; clc;
 
 %% BASIC TEST INFORMATION
 % - Test Date
-target_date = datetime("2022-09-07","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
 % - Target Chip
-target_chip = 1;
+target_chip = 14;
 % - Pads info
 num_pads = 12;
 target_pads = 7:12;
@@ -69,7 +69,9 @@ if step_rise_auto_detect
     stp_i = detect_start(conc_clean,ts,step_length,prepurge);
 else
     % Manually input rising edge index here!
-    stp_i = [1402,3052,4745,6451,8191,9913,11685,14338,15864,17520,19245,20995,22761,24495,27161,28729,30398,32099,33817,35592,37307];
+    stp_i = [1390,3030,4699,6419,8152,9890,16634, ...
+            14323,15860,17513,19226,20968,22693,24433, ...
+            27105,28665,30320,32049,33773,35515,37242];
 end
 stp_f = zeros(size(stp_i));
 if auto_expo_range
@@ -121,7 +123,7 @@ for run = 1:num_runs
         Y = r_norm_pad(non_expo_indices);
 %         Y_mean = mean(Y);
 %         Y_cen = Y - Y_mean;
-        [r_fit_pad, gof] = fit(X,Y,'poly5');
+        [r_fit_pad, gof] = fit(X,Y,'poly5'); % <--- FEEL FREE TO TWEAK!!!
         baseline_pad = r_fit_pad(ts_run);
         % Subtracting baseline from original response data
         r_blc(run_ranges{run,1},pad) = r_norm_pad - baseline_pad;
@@ -265,11 +267,13 @@ for run = 1:num_runs
     colororder(ax_rsp_blc,"default")
     yline(0,'k',HandleVisibility='off')
     ylabel(ax_rsp_blc,"R/R_0 [-]")
-    ylim(ax_rsp_blc, [-2e-3, 7e-3])
+%     ylim(ax_rsp_blc, [-2e-3, 7e-3])
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
     plot(ax_rsp_blc,ts(run_ranges{run})./3600,conc_clean(run_ranges{run}), ...
         DisplayName='NO Concentration',Color="k",LineStyle=":");
+%     plot(ax_rsp_blc,ts(run_ranges{run})./3600,entry_result.rh(run_ranges{run}), ...
+%         DisplayName='NO Concentration',Color="k",LineStyle=":");
     ylabel(ax_rsp_blc,"NO Concentration [ppm]");
     ylim(ax_rsp_blc, [0, 2])
     legend(ax_rsp_blc,'NumColumns',2)
