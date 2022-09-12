@@ -1,13 +1,13 @@
 % this program adds test run data to the CNT_Results.mat
 
-close all;clear all; % clean your workspace first becuase you can import data into an exisint structe and overwrite it... bad
-selpath='/Users/cyano/Documents/GitHub/SCUID-APL/MFC_Tests'; % you secify where you're at
-cd(selpath);
+close all; clear; clc; % clean your workspace first becuase you can import data into an exisint structe and overwrite it... bad
+% selpath='/Users/cyano/Documents/GitHub/SCUID-APL/MFC_Tests'; % you secify where you're at
+% cd(selpath);
 
 %_________________________
 %% Enter data 
 % date and info
-addinfo = "09/0/2022 -Board2"; %enter any information about this test bthat is not contained in the headerfile
+addinfo = "09/11/2022 -Board2 - NO RH"; %enter any information about this test bthat is not contained in the headerfile
 chip = 1; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
@@ -65,8 +65,8 @@ boardtemp = table2array(data(1:end,4));
 
 % Define the resistance data...CAN THIS BE DONE BETTER?
 Rdata = zeros(length(time), 12);
-for i = 1:12
-        Rdata(:,i) = table2array(data(:,i+8))/100; % Rdata format: Rdata(data#, sensorpad#)    
+for j = 1:12
+        Rdata(:,j) = table2array(data(:,j+8))/100; % Rdata format: Rdata(data#, sensorpad#)    
 end
 
 %_____________
@@ -84,6 +84,7 @@ O2Conc = (O2Data./(O2Data+N2Data))*0.23*100;
 [a,b]=size(CNT_Results_NO);
 
 i= a+1;
+
 CNT_Results_NO(i,1).testdateM = testdateM; % this is the data in matlab time at which the data was taken  (extracted from headerfile)
 CNT_Results_NO(i,1).timeE = timeE; %this is the time column , epochtime from LAbview
 CNT_Results_NO(i,1).chip = chip;
@@ -124,26 +125,26 @@ if gas1 ~= gas2
     
     % Gas 1
     if gas1 == "N2O"
-        CNT_Results_NO.n2oppm = [CNT_Results_NO.n2oppm; PPM1];
+        CNT_Results_NO(i,1).n2oppm = PPM1;
     end
     if gas1 == "NO"
-        CNT_Results_NO.noppm = [CNT_Results_NO.noppm; PPM1];
+        CNT_Results_NO(i,1).noppm = PPM1;
     end
 %    
     if gas1 == "NO2"
-        CNT_Results_NO.no2ppm = [CNT_Results_NO.no2ppm; PPM1];
+        CNT_Results_NO(i,1).no2ppm = PPM1;
     end
     
     % Gas 2
     if gas2 == "N2O"
-        CNT_Results_NO.n2oppm = [CNT_Results_NO.n2oppm; PPM2];
+        CNT_Results_NO(i,1).n2oppm = PPM2;
     end
     if gas2 == "NO"
-        CNT_Results_NO.noppm = [CNT_Results_NO.noppm; PPM2];
+        CNT_Results_NO(i,1).noppm = PPM2;
     end
 
     if gas2 == "NO2"
-        CNT_Results_NO.no2ppm = [CNT_Results_NO.no2ppm; PPM2];
+        CNT_Results_NO(i,1).no2ppm = PPM2;
     end
     
 end
