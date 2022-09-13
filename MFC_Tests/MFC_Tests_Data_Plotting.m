@@ -7,22 +7,23 @@ clear; close all; clc;
 
 %% BASIC TEST INFORMATION
 % - Test Date
-target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-12","Format","uuuu-MM-dd");
 % - Target Chip
-target_chip = 14;
+target_chip = 1;
 % - Pads info
 num_pads = 12;
 target_pads = 7:12;
 % Time window settings
 num_runs = 3;
-num_steps = 7; % number of steps per run
-run_length = 6600;
+num_steps = 5;  % number of steps per run
+run_length = 4800;
 step_length = 600;
 prepurge = 600;
-
+min_conc = 1;  % Concentration of the lowest step, in ppm.
+sample_rate = 2;  % How many samples per second?
 %% DATA PROCESSING OPTIONS
 % - Automatically detect rising edge of concentration data.
-step_rise_auto_detect = false;
+step_rise_auto_detect = true;
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
@@ -52,21 +53,26 @@ entry_result = CNT_Results_NO(target_entry,1);
 ts = entry_result.timeE - entry_result.timeE(1);
 
 % Concentration Data Clean-up
-conc_clean = hampel(entry_result.noppm,50);
-conc_clean(isnan(conc_clean)) = 0;
+% conc_clean = hampel(entry_result.noppm,50);
+conc_clean = entry_result.noppm;
+conc_clean(isnan(entry_result.noppm)) = 0;
 
 % Separating the entire data into individual runs
 run_ranges = cell(3,1);
 for run = 1:num_runs-1
-    ts_i = (run-1)*6600;
-    ts_f = ts_i + 6600;
+    ts_i = (run-1)*run_length;
+    ts_f = ts_i + run_length;
     run_ranges{run} = find(ts >= ts_i & ts <= ts_f);
 end
-run_ranges{num_runs} = find(ts >= (num_runs-1)*6600);
+run_ranges{num_runs} = find(ts >= (num_runs-1)*run_length);
 
 % Auto detecting start of exposure steps
 if step_rise_auto_detect
-    stp_i = detect_start(conc_clean,ts,step_length,prepurge);
+%     stp_i = detect_start(conc_clean,ts,step_length,prepurge);
+    conc_grad = gradient(conc_clean, mean(diff(ts)));
+    [pks, locs] = findpeaks(conc_grad, "MinPeakHeight", min_conc*0.9, ...
+        "MinPeakDistance",(step_length)*sample_rate*1.1, Annotate="peaks");
+    stp_i = locs;
 else
     % Manually input rising edge index here!
     stp_i = [1390,3030,4699,6419,8152,9890,16634, ...
@@ -112,6 +118,7 @@ for run = 1:num_runs
     % Time stamps for this run
     ts_run = ts(run_ranges{run,1});
     % Indices corresponding to non-exposure
+    % conc_run = conc_clean(run_ranges{run,1});
     conc_run = conc_clean(run_ranges{run,1});
     non_expo_indices = find(~conc_run);
     % baseline correction for each pad
@@ -329,6 +336,18 @@ for i = 1:length(all_axes)
     end
 end
 
+%% Saving Figures
+% savepath = uigetdir(pwd,"Select Folder to Save Figures in");
+% fig_rh_temp_name = datestr(target_date,'yyyy-mm-dd') + "_"
+% 
+% saveas(fig_rh_temp, [savepath strcat('RH_BoardTemp_vs_Time')])
+% 
+% figfilename1 = ['/MFC_Test_NO_Analysis_Movmean_k_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad_'  num2str(designated_pad)  '_rvc.png'];
+% saveas(movmean_comp_rvc,[pwd figfilename1]);
+% figfilename2 = ['/MFC_Test_NO_Analysis_Movmean_k_Comparison_Results/chip_' num2str(CNT_Results_NO(entry).chip) '_pad_'  num2str(designated_pad)  '_rvt.png'];
+% saveas(movmean_comp_rvt,[pwd figfilename2]);
+
+
 %% Custom Functions
 % Find the desired entry in the struct
 function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
@@ -344,6 +363,12 @@ function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
             end
         end
     end
+end
+
+% Detect Start of Exposure v2
+function start_indices = find_start(conc, total_stpes, step_length)
+    start_indices = zeros(total_stpes,1);
+    
 end
 
 % Detect Start of Exposure
