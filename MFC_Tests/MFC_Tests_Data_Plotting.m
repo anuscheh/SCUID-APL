@@ -7,18 +7,18 @@ clear; close all; clc;
 
 %% BASIC TEST INFORMATION
 % - Test Date
-target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-09","Format","uuuu-MM-dd");
 % - Target Board & Chip
-target_board = 2;
-target_chip = 1;
+target_board = 0;
+target_chip = 14;
 % - Pads info
 num_pads = 12;
 target_pads = 7:12;
 % Gas info
-gas_type = "NO";
+gas_type = "N2O";
 % Time window settings
 num_runs = 3;
-num_steps = 7;  % number of steps per run
+num_steps = 6;  % number of steps per run
 run_length = 6600;
 step_length = 600;
 prepurge = 600;
@@ -88,9 +88,9 @@ if step_rise_auto_detect
     stp_i = locs;
 else
     % Manually input rising edge index here!
-    stp_i = [1390,3030,4699,6419,8152,9890,16634, ...
-            14323,15860,17513,19226,20968,22693,24433, ...
-            27105,28665,30320,32049,33773,35515,37242];
+    stp_i = [1202,2905,4630,6365,8071,9804, ...
+            12817,14490,16183,17923,19648,21373, ...
+            24310,26015,27744,29496,31227,32971];
 end
 stp_f = zeros(size(stp_i));
 if auto_expo_range
