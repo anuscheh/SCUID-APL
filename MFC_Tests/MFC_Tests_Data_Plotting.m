@@ -5,45 +5,54 @@
 
 clear; close all; clc;
 
-%% BASIC TEST INFORMATION
-% - Test Date
+%% Basic Test Information <= MUST CHANGE EVERYTIME!
+% -> Test Date 
 target_date = datetime("2022-09-12","Format","uuuu-MM-dd");
-% - Target Board & Chip
-target_board = 2;
-target_chip = 1;
-% - Pads info
+% -> Target Board & Chip
+target_board = 0;
+target_chip = 14;
+% -- Pads info
 num_pads = 12;
-target_pads = 7:12;
-% Gas info
-gas_type = "N2O";
+target_pads = 1:6;
+% -> Gas info
+gas_type = "NO";
 gas_conc = 12.9;
 gas_humidity = "Humid";
 mfc_name = "MFC1";
-% Time window settings
+% -> Time window info
 num_runs = 3;
-num_steps = 6;  % number of steps per run
-run_length = 6000;
+num_steps = 5;      % number of steps per run
+run_length = 4800;  % can be calculated from flow files.
 step_length = 600;
 prepurge = 600;
-min_conc = 1;  % Concentration of the lowest step, in ppm.
-sample_rate = 2;  % How many samples per second?
+min_conc = 1;       % Concentration of the lowest step, in [ppm].
+sample_rate = 2;    % How many samples per second?
 
-%% DATA PROCESSING OPTIONS
-% - Automatically detect rising edge of concentration data.
-step_rise_auto_detect = false;
+%% Data Processing Options (Only Change When Needed!)
+% Automatically detect rising edge of concentration data.
+step_rise_auto_detect = true;
+% - Manually input indices of rising edges below! 
+rising_edges = [1202,2905,4630,6365,8071,9804, ...
+            12817,14490,16183,17923,19648,21373, ...
+            24310,26015,27744,29496,31227,32971];
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
 sample_length = 180;
-
 % - Perform Moving Mean on data before normalization & baseline correction
 enable_movmean = true;
+% - Response sampling range for Resp vs Conc plots.
+%   Averaging the response across this number of points centered at sample
+%   points.
+r_sample_width = 30;
 
-%% PLOT SETTINGS
+%% Plot Settings (Only Change When Needed!)
 % - Figure size
 fig_size = [1400,600]; % 21:9 aspect ratio
 % - Title Toggle
 enable_title = false;
+
+pads_to_ignore = 12;
 
 %% Initialization
 % Setting figure state variable
@@ -92,9 +101,7 @@ if step_rise_auto_detect
     stp_i = locs;
 else
     % Manually input rising edge index here!
-    stp_i = [1202,2905,4630,6365,8071,9804, ...
-            12817,14490,16183,17923,19648,21373, ...
-            24310,26015,27744,29496,31227,32971];
+    stp_i = rising_edges;
 end
 stp_f = zeros(size(stp_i));
 if auto_expo_range
@@ -112,7 +119,7 @@ if size(stp_i,1) * size(stp_i,2) ~= num_steps*num_runs
     return
 end
 
-% Reshaping these vectors into [run by step] matrices for easier use.
+% Reshaping these vectors into 3 columns for 3 runs with 5 steps each.
 stp_i = reshape(stp_i,num_steps,num_runs);
 stp_f = reshape(stp_f,num_steps,num_runs);
 
@@ -120,7 +127,8 @@ stp_f = reshape(stp_f,num_steps,num_runs);
 if isequal(size(stp_i), [num_steps num_runs])
     disp("Detected step starting indices matches actual steps!")
 else
-    input("Unmatch!")
+    disp("Detected step starting indices DOES NOT match actual steps!")
+    return
 end
 
 % Performing Moving Mean
@@ -166,7 +174,16 @@ end
 
 % Finding sample values of baseline-corrected rsponse to be used in the 
 % response vs concentration plot
-r_samples= reshape(r_blc(stp_f,:), [num_steps num_runs num_pads]);
+r_samp_locs = reshape(stp_f, [num_steps*num_runs,1]);
+r_samples = zeros(length(r_samp_locs),num_pads);
+
+for point = 1:length(r_samp_locs)
+    loc = r_samp_locs(point);
+    r_samp_range = (loc-r_sample_width/2):(loc+r_sample_width/2);
+    r_samples(point,:) = mean(r_blc(r_samp_range,:));
+end
+% Reshaping the samples into steps x runs x pads
+r_samples= reshape(r_samples, [num_steps num_runs num_pads]);
 
 %% File Name - Part I
 % Here is a quick note of how each file name is generated.
@@ -188,7 +205,7 @@ filename1 = strcat(datestr(target_date,'yyyy-mm-dd'), ...
 
 %% Plotting
 
-% RH + Board Temp vs Time (Full)
+%% == RH + Board Temp vs Time (Full)
 fig_rh_temp = figure('Name','Relative Humidity & Board Temp vs Time');
 fig_rh_temp.FileName = filename1 + "_Full" + "_RH+BoardTemp_Time";
 fig_rh_temp.Position = fig_pos;
@@ -212,7 +229,7 @@ if enable_title
     title(ax_rh_temp,"Relative Humidity & Board Temperature vs Time");
 end
 
-% Board Temp + BME Temp vs Time (Full)
+%% == Board Temp + BME Temp vs Time (Full)
 fig_temp_temp = figure('Name','Board Temp & BME Temp');
 fig_temp_temp.FileName = filename1 + "_Full" + "_BoardTemp+BMETemp_Time";
 fig_temp_temp.Position = fig_pos;
@@ -232,7 +249,7 @@ if enable_title
     title(ax_temp_temp,"Board Temperature & BME Temperature vs Time");
 end
 
-% Normalized Signal + Concentration vs Time (Full)
+%% == Normalized Signal + Concentration vs Time (Full)
 fig_rsp_norm = figure('Name','Normalized Data & Concentration vs Time');
 fig_rsp_norm.FileName = filename1 + "_Full" + "_RNorm+Conc_Time";
 fig_rsp_norm.Position = fig_pos;
@@ -243,6 +260,9 @@ xlabel(ax_rsp_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_norm,"left");
 for pad = target_pads
+    if ismember(pad,pads_to_ignore)
+        continue
+    end
     r0 = r(stp_i(1,1)-5,pad);
     plot(ax_rsp_norm,ts./3600,r(:,pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
@@ -260,7 +280,7 @@ if enable_title
         num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
 end
 
-% Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
+%% == Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
 run_pick = 2;
 fig_rsp_run_norm = figure('Name', "Normalized Data & Concentration " + ...
     "vs Time - Run " + num2str(run_pick));
@@ -273,6 +293,9 @@ xlabel(ax_rsp_run_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_run_norm,"left");
 for pad = target_pads
+    if ismember(pad,pads_to_ignore)
+        continue
+    end
     r0 = r(stp_i(1,run_pick)-5,pad);
     plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
         r(run_ranges{run_pick},pad)/r0,...
@@ -294,7 +317,7 @@ end
 hold(ax_rsp_run_norm,"off")
 
 
-% Baseline Corrected Signal + Concentration vs Time (Each Run)
+%% == Baseline Corrected Signal + Concentration vs Time (Each Run)
 fig_rsp_blc = gobjects(num_runs,1);
 for run = 1:num_runs
     fig_rsp_blc(run) = figure('Name', ...
@@ -309,6 +332,9 @@ for run = 1:num_runs
     % Left y axis for response
     yyaxis(ax_rsp_blc,"left");    
     for pad = target_pads
+        if ismember(pad,pads_to_ignore)
+            continue
+        end
         plot(ax_rsp_blc,ts(run_ranges{run,1})./3600,r_blc(run_ranges{run,1}, pad), ...
             DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
@@ -333,7 +359,7 @@ for run = 1:num_runs
     end
 end
 
-% Response vs Concentration (Pads 7-12,Each Run)
+%% == Response vs Concentration (Pads 7-12,Each Run)
 fig_rvc = gobjects(num_runs,1);
 for run = 1:num_runs
     fig_rvc(run) = figure('Name', ...
@@ -348,6 +374,9 @@ for run = 1:num_runs
     ylabel(ax_rvc,"R/R_0 [-]")
 %     ylim(ax_rvc, [-2e-3, 7e-3])
     for pad = target_pads
+        if ismember(pad,pads_to_ignore)
+            continue
+        end
         plot(ax_rvc,conc_stp_avg(:,run), r_samples(:,run,pad),':.',...
             DisplayName=strcat("Pad ",num2str(pad)));
     end
@@ -360,8 +389,7 @@ for run = 1:num_runs
     end
 end
 
-
-%% Overall Plot Format Settings
+%% == Overall Plot Format Settings
 all_figs = findall(groot,'type','figure');
 all_axes = findall(all_figs,'type','axes');
 all_lines = findall(all_figs,'Type','Line');
@@ -407,7 +435,7 @@ switch lower(asksave)
         set(all_figs,"WindowStyle","docked")
     otherwise
         set(all_figs,"WindowState","normal");
-        set(all_figs,"WindowStyle","docked")
+%         set(all_figs,"WindowStyle","docked")
 end       
 
 %% Custom Functions
@@ -425,12 +453,6 @@ function target_entry = get_target_entry(Data_Struct,target_date,target_chip)
             end
         end
     end
-end
-
-% Detect Start of Exposure v2
-function start_indices = find_start(conc, total_stpes, step_length)
-    start_indices = zeros(total_stpes,1);
-    
 end
 
 % Detect Start of Exposure
