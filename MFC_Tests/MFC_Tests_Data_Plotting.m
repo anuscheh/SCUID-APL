@@ -7,17 +7,17 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-09-11","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
 % -> Target Board & Chip
 target_board = 2;
 target_chip = 1;
 % -- Pads info
 num_pads = 12;
-target_pads = 7:12;
+target_pads = 1:6;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 104;
-gas_humidity = "Humid";
+gas_humidity = "Dry";
 mfc_name = "MFC0";
 % -> Time window info
 num_runs = 3;
@@ -32,9 +32,9 @@ sample_rate = 2;    % How many samples per second?
 % Automatically detect rising edge of concentration data.
 step_rise_auto_detect = false;
 % - Manually input indices of rising edges below! 
-rising_edges = [1763,3055,4716,6452,8179,9929,11679, ...
-                14462,15943,17603,19323,21065,22805,24521, ...
-                27210,28761,30421,32136,33856,35570,37313];
+rising_edges = [1390,3030,4699,6419,8152,9890,16634, ...
+14323,15860,17513,19226,20968,22693,24433, ...
+27105,28665,30320,32049,33773,35515,37242];  % 09-10-2022
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
