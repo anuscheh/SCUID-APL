@@ -7,22 +7,22 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-09-12","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-11","Format","uuuu-MM-dd");
 % -> Target Board & Chip
-target_board = 0;
-target_chip = 14;
+target_board = 2;
+target_chip = 1;
 % -- Pads info
 num_pads = 12;
-target_pads = 1:6;
+target_pads = 7:12;
 % -> Gas info
 gas_type = "NO";
-gas_conc = 12.9;
+gas_conc = 104;
 gas_humidity = "Humid";
-mfc_name = "MFC1";
+mfc_name = "MFC0";
 % -> Time window info
 num_runs = 3;
-num_steps = 5;      % number of steps per run
-run_length = 4800;  % can be calculated from flow files.
+num_steps = 7;      % number of steps per run
+run_length = 6600;  % can be calculated from flow files.
 step_length = 600;
 prepurge = 600;
 min_conc = 1;       % Concentration of the lowest step, in [ppm].
@@ -30,11 +30,11 @@ sample_rate = 2;    % How many samples per second?
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
-step_rise_auto_detect = true;
+step_rise_auto_detect = false;
 % - Manually input indices of rising edges below! 
-rising_edges = [1202,2905,4630,6365,8071,9804, ...
-            12817,14490,16183,17923,19648,21373, ...
-            24310,26015,27744,29496,31227,32971];
+rising_edges = [1763,3055,4716,6452,8179,9929,11679, ...
+                14462,15943,17603,19323,21065,22805,24521, ...
+                27210,28761,30421,32136,33856,35570,37313];
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
@@ -51,7 +51,7 @@ r_sample_width = 30;
 fig_size = [1400,600]; % 21:9 aspect ratio
 % - Title Toggle
 enable_title = false;
-
+% - Pads not to put on the plots
 pads_to_ignore = 12;
 
 %% Initialization
@@ -271,9 +271,9 @@ colororder(ax_rsp_norm,'default');
 ylabel(ax_rsp_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_norm,"right");
-plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName='NO Concentration', ...
+plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName=gas_type+" Concentration", ...
     LineStyle=':',Color="k");
-ylabel(ax_rsp_norm,"NO Concentration [ppm]");
+ylabel(ax_rsp_norm,gas_type+" Concentration [ppm]");
 legend(ax_rsp_norm,'NumColumns',2);
 if enable_title
     title(ax_rsp_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
@@ -306,9 +306,9 @@ ylabel(ax_rsp_run_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_run_norm,"right");
 plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
-    conc_clean(run_ranges{run_pick}),DisplayName='NO Concentration', ...
+    conc_clean(run_ranges{run_pick}),DisplayName=gas_type+" Concentration", ...
     Color="k",LineStyle=":");
-ylabel(ax_rsp_run_norm,"NO Concentration [ppm]");
+ylabel(ax_rsp_run_norm,gas_type+" Concentration [ppm]");
 legend(ax_rsp_run_norm,'NumColumns',2);
 if enable_title
     title(ax_rsp_run_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
@@ -345,10 +345,10 @@ for run = 1:num_runs
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
     plot(ax_rsp_blc,ts(run_ranges{run})./3600,conc_clean(run_ranges{run}), ...
-        DisplayName='NO Concentration',Color="k",LineStyle=":");
+        DisplayName=gas_type+" Concentration",Color="k",LineStyle=":");
 %     plot(ax_rsp_blc,ts(run_ranges{run})./3600,entry_result.rh(run_ranges{run}), ...
-%         DisplayName='NO Concentration',Color="k",LineStyle=":");
-    ylabel(ax_rsp_blc,"NO Concentration [ppm]");
+%         DisplayName=gas_type+" Concentration",Color="k",LineStyle=":");
+    ylabel(ax_rsp_blc,gas_type+" Concentration [ppm]");
     ylim(ax_rsp_blc, [0, 2])
     legend(ax_rsp_blc,'NumColumns',2)
     hold(ax_rsp_blc,"off")
@@ -405,14 +405,15 @@ for i = 1:length(all_axes)
         ax.YAxis(j).Color = 'k';
     end
 end
-set(all_figs,"WindowState","minimized");
+set(all_figs,"WindowState","normal");
 
 %% Saving Figures
 asksave = input("Save all Figures? [Y/n]: ",'s');
 switch lower(asksave)
     case {"y",''}
         plotpath = pwd + "/MFC_Plots";
-        datepath = "/" + datestr(target_date,'yyyy-mm-dd');
+        datepath = "/" + datestr(target_date,'yyyy-mm-dd') + "_" ...
+            + gas_type + "_"+ num2str(gas_conc)+"ppm_"+ gas_humidity;
         chippath = "/Board" + num2str(target_board) + "_Chip" + ...
                     num2str(target_chip) + "_" + gas_humidity + "/";
         savepath = plotpath + datepath + chippath;
@@ -432,7 +433,7 @@ switch lower(asksave)
         end
         disp("Figures saved successfully under:")
         disp(savepath)
-        set(all_figs,"WindowStyle","docked")
+        set(all_figs,"WindowState","normal");
     otherwise
         set(all_figs,"WindowState","normal");
 %         set(all_figs,"WindowStyle","docked")
