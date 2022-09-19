@@ -53,7 +53,7 @@ The resulting plot looks like this.
 <p><img src="Sample_Plot.png" alt="Sample Plot" title="Sample Plot" width=600/><p/>
 
 ## Plot Image File Naming Conventions
-- For plots associated with the MFC setup, please check [this documentation](MFC_Tests/MFC_Plots_Naming _Convention.md).
+- For plots associated with the MFC setup, please check [this documentation](/MFC_Tests/MFC_Plots_Naming_Convention.md).
 
 ## File and Folder Organization Guide
 We would like to make sure that everybody can find what they want easily, so please organize the files in the following way.
