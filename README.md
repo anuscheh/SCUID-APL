@@ -52,6 +52,9 @@ saveas(fig_sin, filename, "png");
 The resulting plot looks like this.
 <p><img src="Sample_Plot.png" alt="Sample Plot" title="Sample Plot" width=600/><p/>
 
+## Plot Image File Naming Conventions
+- For plots associated with the MFC setup, please check [this documentation](MFC_Tests/MFC_Plots_Naming _Convention.md).
+
 ## File and Folder Organization Guide
 We would like to make sure that everybody can find what they want easily, so please organize the files in the following way.
 1. Everything should be put somewhere inside the `SCUID-APL` folder. If you are using GitHub Desktop, this folder should be under `Documents/GitHub/` on your local machine, unless you customized it while cloning the repository.
