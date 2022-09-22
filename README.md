@@ -4,8 +4,10 @@ This is a repository for all data collecting and processing scripts used on the 
 ## Table of Contents
 - [SCUID-APL](#scuid-apl)
   * [Plotting Standard](#plotting-standard)
+  * [Plot Image File Naming Conventions](#plot-image-file-naming-conventions)
   * [File and Folder Organization Guide](#file-and-folder-organization-guide)
   * [Experiment Folder Format Quick Reference](#experiment-folder-format-quick-reference)
+
 
 ## Plotting Standard
 All plots created with MATLAB should be visually consistent so that they are easy to read and suitable for presentation slides. See below for a general guideline.
@@ -51,6 +53,9 @@ saveas(fig_sin, filename, "png");
 ```
 The resulting plot looks like this.
 <p><img src="Sample_Plot.png" alt="Sample Plot" title="Sample Plot" width=600/><p/>
+
+## Plot Image File Naming Conventions
+- For plots associated with the MFC setup, please check [this documentation](/MFC_Tests/MFC_Plots_Naming_Convention.md).
 
 ## File and Folder Organization Guide
 We would like to make sure that everybody can find what they want easily, so please organize the files in the following way.
