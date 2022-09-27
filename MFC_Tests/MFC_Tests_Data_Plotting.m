@@ -5,37 +5,54 @@
 
 clear; close all; clc;
 
-%% BASIC TEST INFORMATION
-% - Test Date
+%% Basic Test Information <= MUST CHANGE EVERYTIME!
+% -> Test Date 
 target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
-% - Target Chip
-target_chip = 14;
-% - Pads info
+% -> Target Board & Chip
+target_board = 2;
+target_chip = 1;
+% -- Pads info
 num_pads = 12;
-target_pads = 7:12;
-% Time window settings
+target_pads = 1:6;
+% -> Gas info
+gas_type = "NO";
+gas_conc = 104;
+gas_humidity = "Dry";
+mfc_name = "MFC0";
+% -> Time window info
 num_runs = 3;
-num_steps = 7; % number of steps per run
-run_length = 6600;
+num_steps = 7;      % number of steps per run
+run_length = 6600;  % can be calculated from flow files.
 step_length = 600;
 prepurge = 600;
+min_conc = 1;       % Concentration of the lowest step, in [ppm].
+sample_rate = 2;    % How many samples per second?
 
-%% DATA PROCESSING OPTIONS
-% - Automatically detect rising edge of concentration data.
+%% Data Processing Options (Only Change When Needed!)
+% Automatically detect rising edge of concentration data.
 step_rise_auto_detect = false;
+% - Manually input indices of rising edges below! 
+rising_edges = [1390,3030,4699,6419,8152,9890,16634, ...
+14323,15860,17513,19226,20968,22693,24433, ...
+27105,28665,30320,32049,33773,35515,37242];  % 09-10-2022
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
 sample_length = 180;
-
 % - Perform Moving Mean on data before normalization & baseline correction
 enable_movmean = true;
+% - Response sampling range for Resp vs Conc plots.
+%   Averaging the response across this number of points centered at sample
+%   points.
+r_sample_width = 30;
 
-%% PLOT SETTINGS
+%% Plot Settings (Only Change When Needed!)
 % - Figure size
 fig_size = [1400,600]; % 21:9 aspect ratio
 % - Title Toggle
-enable_title = true;
+enable_title = false;
+% - Pads not to put on the plots
+pads_to_ignore = 12;
 
 %% Initialization
 % Setting figure state variable
@@ -45,6 +62,7 @@ fig_pos = [200,200,fig_size];
 load("CNT_Results_NO.mat")
 % Finding entry in struct according to given date & chip
 target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
+% target_entry = 42;
 entry_result = CNT_Results_NO(target_entry,1);
 
 %% Data Processing
@@ -52,26 +70,38 @@ entry_result = CNT_Results_NO(target_entry,1);
 ts = entry_result.timeE - entry_result.timeE(1);
 
 % Concentration Data Clean-up
-conc_clean = hampel(entry_result.noppm,50);
-conc_clean(isnan(conc_clean)) = 0;
+% conc_clean = hampel(entry_result.noppm,50);
+switch upper(gas_type)
+    case "NO"
+        conc_clean = entry_result.noppm;
+    case "N2O"
+        conc_clean = entry_result.n2oppm;
+    otherwise
+        disp("You might have entered gas type wrong! Please double-check!")
+        return
+end
+
+conc_clean(isnan(entry_result.noppm)) = 0;
 
 % Separating the entire data into individual runs
 run_ranges = cell(3,1);
 for run = 1:num_runs-1
-    ts_i = (run-1)*6600;
-    ts_f = ts_i + 6600;
+    ts_i = (run-1)*run_length;
+    ts_f = ts_i + run_length;
     run_ranges{run} = find(ts >= ts_i & ts <= ts_f);
 end
-run_ranges{num_runs} = find(ts >= (num_runs-1)*6600);
+run_ranges{num_runs} = find(ts >= (num_runs-1)*run_length);
 
 % Auto detecting start of exposure steps
 if step_rise_auto_detect
-    stp_i = detect_start(conc_clean,ts,step_length,prepurge);
+%     stp_i = detect_start(conc_clean,ts,step_length,prepurge);
+    conc_grad = gradient(conc_clean, mean(diff(ts)));
+    [pks, locs] = findpeaks(conc_grad, "MinPeakHeight", min_conc*0.9, ...
+        "MinPeakDistance",(step_length)*sample_rate*1.1, Annotate="peaks");
+    stp_i = locs;
 else
     % Manually input rising edge index here!
-    stp_i = [1390,3030,4699,6419,8152,9890,16634, ...
-            14323,15860,17513,19226,20968,22693,24433, ...
-            27105,28665,30320,32049,33773,35515,37242];
+    stp_i = rising_edges;
 end
 stp_f = zeros(size(stp_i));
 if auto_expo_range
@@ -89,7 +119,7 @@ if size(stp_i,1) * size(stp_i,2) ~= num_steps*num_runs
     return
 end
 
-% Reshaping these vectors into [run by step] matrices for easier use.
+% Reshaping these vectors into 3 columns for 3 runs with 5 steps each.
 stp_i = reshape(stp_i,num_steps,num_runs);
 stp_f = reshape(stp_f,num_steps,num_runs);
 
@@ -97,7 +127,8 @@ stp_f = reshape(stp_f,num_steps,num_runs);
 if isequal(size(stp_i), [num_steps num_runs])
     disp("Detected step starting indices matches actual steps!")
 else
-    input("Unmatch!")
+    disp("Detected step starting indices DOES NOT match actual steps!")
+    return
 end
 
 % Performing Moving Mean
@@ -112,6 +143,7 @@ for run = 1:num_runs
     % Time stamps for this run
     ts_run = ts(run_ranges{run,1});
     % Indices corresponding to non-exposure
+    % conc_run = conc_clean(run_ranges{run,1});
     conc_run = conc_clean(run_ranges{run,1});
     non_expo_indices = find(~conc_run);
     % baseline correction for each pad
@@ -142,11 +174,40 @@ end
 
 % Finding sample values of baseline-corrected rsponse to be used in the 
 % response vs concentration plot
-r_samples= reshape(r_blc(stp_f,:), [num_steps num_runs num_pads]);
+r_samp_locs = reshape(stp_f, [num_steps*num_runs,1]);
+r_samples = zeros(length(r_samp_locs),num_pads);
+
+for point = 1:length(r_samp_locs)
+    loc = r_samp_locs(point);
+    r_samp_range = (loc-r_sample_width/2):(loc+r_sample_width/2);
+    r_samples(point,:) = mean(r_blc(r_samp_range,:));
+end
+% Reshaping the samples into steps x runs x pads
+r_samples= reshape(r_samples, [num_steps num_runs num_pads]);
+
+%% File Name - Part I
+% Here is a quick note of how each file name is generated.
+% Part 1 - Date, Board, Chip, MFC, Gas, Concentration, Humid/Dry 
+%   Format: YYYY-MM-DD_Bx_Cx_MFCx_GAS_xxxppm_Humid
+%   Same for all figs generated by running this script once.
+% Part 2 - Data Range
+%   Specify if the range is the entire test (Full) or one series (Runx)
+% Part 3 - Y quantity, X quantity
+%   Format: YQuantity1+YQuantity2_XQuantity
+% Connect the three parts with underscores: Part1_Part2_Part3
+% A general example:
+%   "2022-09-12_B0_C14_Full_BoardTemp+BMETemp_Time"
+filename1 = strcat(datestr(target_date,'yyyy-mm-dd'), ...
+    "_B",num2str(target_board), "_C", num2str(target_chip), "_P", ...
+        num2str(target_pads(1)), "-", num2str(target_pads(end)), ...
+        "_", mfc_name, "_", gas_type, "_", ...
+        num2str(gas_conc),"ppm_", gas_humidity);
 
 %% Plotting
-% RH + Board Temp vs Time (Full)
+
+%% == RH + Board Temp vs Time (Full)
 fig_rh_temp = figure('Name','Relative Humidity & Board Temp vs Time');
+fig_rh_temp.FileName = filename1 + "_Full" + "_RH+BoardTemp_Time";
 fig_rh_temp.Position = fig_pos;
 tiledlayout(1,1);
 ax_rh_temp = nexttile;
@@ -168,8 +229,9 @@ if enable_title
     title(ax_rh_temp,"Relative Humidity & Board Temperature vs Time");
 end
 
-% Board Temp + BME Temp vs Time (Full)
+%% == Board Temp + BME Temp vs Time (Full)
 fig_temp_temp = figure('Name','Board Temp & BME Temp');
+fig_temp_temp.FileName = filename1 + "_Full" + "_BoardTemp+BMETemp_Time";
 fig_temp_temp.Position = fig_pos;
 tiledlayout(1,1);
 ax_temp_temp = nexttile;
@@ -187,8 +249,9 @@ if enable_title
     title(ax_temp_temp,"Board Temperature & BME Temperature vs Time");
 end
 
-% Normalized Signal + Concentration vs Time (Full)
+%% == Normalized Signal + Concentration vs Time (Full)
 fig_rsp_norm = figure('Name','Normalized Data & Concentration vs Time');
+fig_rsp_norm.FileName = filename1 + "_Full" + "_RNorm+Conc_Time";
 fig_rsp_norm.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_norm = nexttile;
@@ -197,6 +260,9 @@ xlabel(ax_rsp_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_norm,"left");
 for pad = target_pads
+    if ismember(pad,pads_to_ignore)
+        continue
+    end
     r0 = r(stp_i(1,1)-5,pad);
     plot(ax_rsp_norm,ts./3600,r(:,pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
@@ -205,19 +271,20 @@ colororder(ax_rsp_norm,'default');
 ylabel(ax_rsp_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_norm,"right");
-plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName='NO Concentration', ...
+plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName=gas_type+" Concentration", ...
     LineStyle=':',Color="k");
-ylabel(ax_rsp_norm,"NO Concentration [ppm]");
+ylabel(ax_rsp_norm,gas_type+" Concentration [ppm]");
 legend(ax_rsp_norm,'NumColumns',2);
 if enable_title
     title(ax_rsp_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
         num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
 end
 
-% Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
+%% == Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
 run_pick = 2;
 fig_rsp_run_norm = figure('Name', "Normalized Data & Concentration " + ...
     "vs Time - Run " + num2str(run_pick));
+fig_rsp_run_norm.FileName = filename1 + "_Run" + num2str(run_pick) + "_RNorm+Conc_Time";
 fig_rsp_run_norm.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_run_norm = nexttile;
@@ -226,6 +293,9 @@ xlabel(ax_rsp_run_norm,"Time [h]");
 % Left y axis for response
 yyaxis(ax_rsp_run_norm,"left");
 for pad = target_pads
+    if ismember(pad,pads_to_ignore)
+        continue
+    end
     r0 = r(stp_i(1,run_pick)-5,pad);
     plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
         r(run_ranges{run_pick},pad)/r0,...
@@ -236,9 +306,9 @@ ylabel(ax_rsp_run_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_run_norm,"right");
 plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
-    conc_clean(run_ranges{run_pick}),DisplayName='NO Concentration', ...
+    conc_clean(run_ranges{run_pick}),DisplayName=gas_type+" Concentration", ...
     Color="k",LineStyle=":");
-ylabel(ax_rsp_run_norm,"NO Concentration [ppm]");
+ylabel(ax_rsp_run_norm,gas_type+" Concentration [ppm]");
 legend(ax_rsp_run_norm,'NumColumns',2);
 if enable_title
     title(ax_rsp_run_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
@@ -247,12 +317,13 @@ end
 hold(ax_rsp_run_norm,"off")
 
 
-% Baseline Corrected Signal + Concentration vs Time (Each Run)
+%% == Baseline Corrected Signal + Concentration vs Time (Each Run)
 fig_rsp_blc = gobjects(num_runs,1);
 for run = 1:num_runs
     fig_rsp_blc(run) = figure('Name', ...
         strcat("Response vs Time - Run ",num2str(run), ...
         " - Baseline Corrected"));
+    fig_rsp_blc(run).FileName = filename1 + "_Run" + num2str(run) + "_RCorr+Conc_Time";
     fig_rsp_blc(run).Position = fig_pos;
     tiledlayout(1,1);
     ax_rsp_blc = nexttile;
@@ -261,6 +332,9 @@ for run = 1:num_runs
     % Left y axis for response
     yyaxis(ax_rsp_blc,"left");    
     for pad = target_pads
+        if ismember(pad,pads_to_ignore)
+            continue
+        end
         plot(ax_rsp_blc,ts(run_ranges{run,1})./3600,r_blc(run_ranges{run,1}, pad), ...
             DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
@@ -271,10 +345,10 @@ for run = 1:num_runs
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
     plot(ax_rsp_blc,ts(run_ranges{run})./3600,conc_clean(run_ranges{run}), ...
-        DisplayName='NO Concentration',Color="k",LineStyle=":");
+        DisplayName=gas_type+" Concentration",Color="k",LineStyle=":");
 %     plot(ax_rsp_blc,ts(run_ranges{run})./3600,entry_result.rh(run_ranges{run}), ...
-%         DisplayName='NO Concentration',Color="k",LineStyle=":");
-    ylabel(ax_rsp_blc,"NO Concentration [ppm]");
+%         DisplayName=gas_type+" Concentration",Color="k",LineStyle=":");
+    ylabel(ax_rsp_blc,gas_type+" Concentration [ppm]");
     ylim(ax_rsp_blc, [0, 2])
     legend(ax_rsp_blc,'NumColumns',2)
     hold(ax_rsp_blc,"off")
@@ -285,12 +359,13 @@ for run = 1:num_runs
     end
 end
 
-% Response vs Concentration (Pads 7-12,Each Run)
+%% == Response vs Concentration (Pads 7-12,Each Run)
 fig_rvc = gobjects(num_runs,1);
 for run = 1:num_runs
     fig_rvc(run) = figure('Name', ...
         strcat("Response vs Concentration - Run ",num2str(run), ...
         " - Baseline Corrected"));
+    fig_rvc(run).FileName = filename1 + "_Run" + num2str(run) + "_RCorr_Conc";
     fig_rvc(run).Position = fig_pos;
     tiledlayout(1,1);
     ax_rvc = nexttile;
@@ -299,6 +374,9 @@ for run = 1:num_runs
     ylabel(ax_rvc,"R/R_0 [-]")
 %     ylim(ax_rvc, [-2e-3, 7e-3])
     for pad = target_pads
+        if ismember(pad,pads_to_ignore)
+            continue
+        end
         plot(ax_rvc,conc_stp_avg(:,run), r_samples(:,run,pad),':.',...
             DisplayName=strcat("Pad ",num2str(pad)));
     end
@@ -311,8 +389,7 @@ for run = 1:num_runs
     end
 end
 
-
-%% Overall Plot Format Settings
+%% == Overall Plot Format Settings
 all_figs = findall(groot,'type','figure');
 all_axes = findall(all_figs,'type','axes');
 all_lines = findall(all_figs,'Type','Line');
@@ -328,6 +405,39 @@ for i = 1:length(all_axes)
         ax.YAxis(j).Color = 'k';
     end
 end
+set(all_figs,"WindowState","normal");
+
+%% Saving Figures
+asksave = input("Save all Figures? [Y/n]: ",'s');
+switch lower(asksave)
+    case {"y",''}
+        plotpath = pwd + "/MFC_Plots";
+        datepath = "/" + datestr(target_date,'yyyy-mm-dd') + "_" ...
+            + gas_type + "_"+ num2str(gas_conc)+"ppm_"+ gas_humidity;
+        chippath = "/Board" + num2str(target_board) + "_Chip" + ...
+                    num2str(target_chip) + "_" + gas_humidity + "/";
+        savepath = plotpath + datepath + chippath;
+        if ~exist(savepath, 'dir')
+            disp("There is no such directory:");
+            disp(savepath);
+            disp("I will create the directory for you.")
+            mkdir(savepath)
+        end
+        for f = 1:length(all_figs)
+            this_filename = all_figs(f).FileName;
+            if contains(all_figs(f).FileName,".")
+                this_filename = this_filename + ".png";
+            end
+            disp("Saving: " + this_filename);
+            saveas(all_figs(f),fullfile(savepath, this_filename),'png');
+        end
+        disp("Figures saved successfully under:")
+        disp(savepath)
+        set(all_figs,"WindowState","normal");
+    otherwise
+        set(all_figs,"WindowState","normal");
+%         set(all_figs,"WindowStyle","docked")
+end       
 
 %% Custom Functions
 % Find the desired entry in the struct

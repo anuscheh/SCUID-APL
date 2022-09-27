@@ -7,7 +7,7 @@ close all; clear; clc; % clean your workspace first becuase you can import data 
 %_________________________
 %% Enter data 
 % date and info
-addinfo = "09/11/2022 -Board2 - NO RH"; %enter any information about this test bthat is not contained in the headerfile
+addinfo = "09/12/2022 -Board2 - N2O RH"; %enter any information about this test bthat is not contained in the headerfile
 chip = 1; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
