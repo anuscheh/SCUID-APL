@@ -7,9 +7,9 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-27","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 2;
+target_board = 0;
 target_chip = 1;
 % -- Pads info
 num_pads = 12;
@@ -18,13 +18,13 @@ target_pads = 1:6;
 gas_type = "NO";
 gas_conc = 104;
 gas_humidity = "Dry";
-mfc_name = "MFC0";
+mfc_name = "MFC1";
 % -> Time window info
-num_runs = 3;
-num_steps = 7;      % number of steps per run
-run_length = 6600;  % can be calculated from flow files.
-step_length = 600;
-prepurge = 600;
+num_runs = 2;
+num_steps = 3;      % number of steps per run
+run_length = 3900;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+step_length = 180;  % seconds for NO exposure
+prepurge = 1800;    % seconds
 min_conc = 1;       % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
@@ -38,7 +38,7 @@ rising_edges = [1390,3030,4699,6419,8152,9890,16634, ...
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
-sample_length = 180;
+sample_length = 60;     %changed this 9/28 from 180 to 60
 % - Perform Moving Mean on data before normalization & baseline correction
 enable_movmean = true;
 % - Response sampling range for Resp vs Conc plots.
