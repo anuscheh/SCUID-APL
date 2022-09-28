@@ -9,15 +9,15 @@ clear; close all; clc;
 % -> Test Date 
 target_date = datetime("2022-09-27","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 0;
-target_chip = 1;
+target_board = 1;
+target_chip = 2;
 % -- Pads info
 num_pads = 12;
 target_pads = 1:6;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 12.9;
-gas_humidity = "Dry";
+gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
 num_runs = 2;
@@ -62,7 +62,7 @@ fig_pos = [200,200,fig_size];
 load("CNT_Results_NO.mat")
 % Finding entry in struct according to given date & chip
 % target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
-target_entry = 43;
+target_entry = 47;
 entry_result = CNT_Results_NO(target_entry,1);
 % Show entry + addinfo field
 fprintf("Entry: \t\t%d\n", target_entry);
