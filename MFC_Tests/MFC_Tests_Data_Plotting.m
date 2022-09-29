@@ -7,26 +7,28 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-09-27","Format","yyyy-MM-dd");
+target_date = datetime("2022-09-29","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 1;
-target_chip = 2;
+target_board = 0;
+target_chip = 19;
 % -- Pads info
 num_pads = 12;
-target_pads = 1:6;
+target_pads = 7:12;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 12.9;
-gas_humidity = "RH";
+gas_humidity = "Dry";
 mfc_name = "MFC1";
 % -> Time window info
 num_runs = 2;
 num_steps = 3;      % number of steps per run
 run_length = 4400;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
-step_length = 180;  % seconds for NO exposure
-prepurge = 600;     % seconds
+step_length = 120;  % seconds for NO exposure
+prepurge = 1800;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
+
+target_entry = 49; % <<<<<<<<<<<< CHANGE THIS
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
@@ -52,7 +54,7 @@ fig_size = [1400,600]; % 21:9 aspect ratio
 % - Title Toggle
 enable_title = false;
 % - Pads not to put on the plots
-pads_to_ignore = 12;
+pads_to_ignore = [];
 
 %% Initialization
 % Setting figure state variable
@@ -62,7 +64,7 @@ fig_pos = [200,200,fig_size];
 load("CNT_Results_NO.mat")
 % Finding entry in struct according to given date & chip
 % target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
-target_entry = 47;
+
 entry_result = CNT_Results_NO(target_entry,1);
 % Show entry + addinfo field
 fprintf("Entry: \t\t%d\n", target_entry);
@@ -84,7 +86,7 @@ switch upper(gas_type)
         return
 end
 % ===== Manual override for 09/27 data (wrong field) =====
-conc_clean = entry_result.n2oppm;
+% conc_clean = entry_result.n2oppm;
 
 % Replacing all the NaN values with 0
 conc_clean(isnan(conc_clean)) = 0;
