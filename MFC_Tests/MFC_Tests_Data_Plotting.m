@@ -7,30 +7,30 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-09-10","Format","uuuu-MM-dd");
+target_date = datetime("2022-09-27","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 2;
-target_chip = 1;
+target_board = 1;
+target_chip = 2;
 % -- Pads info
 num_pads = 12;
 target_pads = 1:6;
 % -> Gas info
 gas_type = "NO";
-gas_conc = 104;
-gas_humidity = "Dry";
-mfc_name = "MFC0";
+gas_conc = 12.9;
+gas_humidity = "RH";
+mfc_name = "MFC1";
 % -> Time window info
-num_runs = 3;
-num_steps = 7;      % number of steps per run
-run_length = 6600;  % can be calculated from flow files.
-step_length = 600;
-prepurge = 600;
-min_conc = 1;       % Concentration of the lowest step, in [ppm].
+num_runs = 2;
+num_steps = 3;      % number of steps per run
+run_length = 4400;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+step_length = 180;  % seconds for NO exposure
+prepurge = 600;     % seconds
+min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
-step_rise_auto_detect = false;
+step_rise_auto_detect = true;
 % - Manually input indices of rising edges below! 
 rising_edges = [1390,3030,4699,6419,8152,9890,16634, ...
 14323,15860,17513,19226,20968,22693,24433, ...
@@ -38,7 +38,7 @@ rising_edges = [1390,3030,4699,6419,8152,9890,16634, ...
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
-sample_length = 180;
+sample_length = 60;     %changed this 9/28 from 180 to 60
 % - Perform Moving Mean on data before normalization & baseline correction
 enable_movmean = true;
 % - Response sampling range for Resp vs Conc plots.
@@ -61,9 +61,12 @@ fig_pos = [200,200,fig_size];
 %% Loading Data
 load("CNT_Results_NO.mat")
 % Finding entry in struct according to given date & chip
-target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
-% target_entry = 42;
+% target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
+target_entry = 47;
 entry_result = CNT_Results_NO(target_entry,1);
+% Show entry + addinfo field
+fprintf("Entry: \t\t%d\n", target_entry);
+fprintf("Entry Info: \t%s\n", entry_result.addinfo);
 
 %% Data Processing
 % Getting Time Stamps
@@ -80,11 +83,14 @@ switch upper(gas_type)
         disp("You might have entered gas type wrong! Please double-check!")
         return
 end
+% ===== Manual override for 09/27 data (wrong field) =====
+conc_clean = entry_result.n2oppm;
 
-conc_clean(isnan(entry_result.noppm)) = 0;
+% Replacing all the NaN values with 0
+conc_clean(isnan(conc_clean)) = 0;
 
 % Separating the entire data into individual runs
-run_ranges = cell(3,1);
+run_ranges = cell(num_runs,1);
 for run = 1:num_runs-1
     ts_i = (run-1)*run_length;
     ts_f = ts_i + run_length;
@@ -92,7 +98,7 @@ for run = 1:num_runs-1
 end
 run_ranges{num_runs} = find(ts >= (num_runs-1)*run_length);
 
-% Auto detecting start of exposure steps
+%% Auto detecting start of exposure steps
 if step_rise_auto_detect
 %     stp_i = detect_start(conc_clean,ts,step_length,prepurge);
     conc_grad = gradient(conc_clean, mean(diff(ts)));
