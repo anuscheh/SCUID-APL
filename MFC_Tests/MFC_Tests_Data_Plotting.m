@@ -20,15 +20,15 @@ gas_conc = 12.9;
 gas_humidity = "Dry";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 2;
+num_runs = 1;
 num_steps = 3;      % number of steps per run
-run_length = 4400;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+run_length = 3060;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
 step_length = 120;  % seconds for NO exposure
 prepurge = 1800;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-target_entry = 49; % <<<<<<<<<<<< CHANGE THIS
+target_entry = 52; % <<<<<<<<<<<< CHANGE THIS
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
