@@ -31,7 +31,7 @@ for entry = 1:length(SCUID_Test_Results)
         break
     end
 end
-tgt_entry = 8;
+tgt_entry = 7;
 
 %% Plotting
 % Time stamp preparation
