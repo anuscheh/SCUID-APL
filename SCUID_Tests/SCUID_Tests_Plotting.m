@@ -31,6 +31,7 @@ for entry = 1:length(SCUID_Test_Results)
         break
     end
 end
+tgt_entry = 7;
 
 %% Plotting
 % Time stamp preparation
@@ -49,7 +50,7 @@ plot(ts,SCUID_Test_Results(tgt_entry,1).RH,'DisplayName',...
 xlabel(ax_rh,'Time [s]');
 ylabel(ax_rh,'Relative Humidity');
 legend(ax_rh,'edgecolor','none', 'location','northeast');
-%fontsize(fig_rh,20,'points');
+fontsize(fig_rh,20,'points');
 hold(ax_rh,'off');
 
 % Temperature Plot
@@ -65,7 +66,7 @@ plot(ax_temp,ts,SCUID_Test_Results(tgt_entry,1).Temp1,'DisplayName',...
 xlabel(ax_temp,'Time [s]');
 ylabel(ax_temp,['Temperature [' char(176) 'C]']);
 legend(ax_temp,'edgecolor','none', 'location','northeast');
-%fontsize(fig_temp,20,'points');
+fontsize(fig_temp,20,'points');
 hold(ax_temp,'off')
 
 % Pressure Plot
@@ -81,7 +82,7 @@ plot(ax_p,ts,SCUID_Test_Results(tgt_entry,1).P1,'DisplayName',...
 xlabel(ax_p,'Time [s]');
 ylabel(ax_p,'Pressure [mBar]');
 legend(ax_p,'edgecolor','none', 'location','northeast');
-%fontsize(fig_p,20,'points');
+fontsize(fig_p,20,'points');
 hold(ax_p,'off')
 
 % Sensors 1-6 Plot
@@ -97,7 +98,7 @@ end
 xlabel(ax_sg1,'Time [s]');
 ylabel(ax_sg1,"Response")
 legend(ax_sg1,'edgecolor','none', 'location','northeast');
-%fontsize(fig_sg1,20,'points');
+fontsize(fig_sg1,20,'points');
 hold(ax_sg1,'off');
 
 % Sensors 7-12 Plot
@@ -113,7 +114,7 @@ end
 xlabel(ax_sg2,'Time [s]');
 ylabel(ax_sg2,"Response")
 legend(ax_sg2,'edgecolor','none', 'location','northeast');
-%fontsize(fig_sg2,20,'points');
+fontsize(fig_sg2,20,'points');
 hold(ax_sg2,'off');
 
 % Plotting injection x lines
@@ -124,8 +125,8 @@ for i = 1:length(SCUID_Test_Results(tgt_entry,1).InjectionTime)
     xline_pos = time_inj_ue - SCUID_Test_Results(tgt_entry,1).TimeUE(1);
     for ax = [ax_rh ax_temp ax_p ax_sg1 ax_sg2]
         display_name = strcat(gas_type," Injection ",num2str(i));
-        xline(ax,xline_pos,'-',display_name)
-            %FontSize=20,LineWidth=2,HandleVisibility='off')
+        xline(ax,xline_pos,'-',display_name,...
+            FontSize=20,LineWidth=2,HandleVisibility='off')
     end
 end
 
