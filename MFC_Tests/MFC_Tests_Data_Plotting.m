@@ -7,13 +7,13 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-10-10","Format","yyyy-MM-dd");
+target_date = datetime("2022-10-07","Format","yyyy-MM-dd");
 % -> Target Board & Chip
 target_board = 1;
 target_chip = 17;
 % -- Pads info
 num_pads = 12;
-target_pads = 7:12;
+target_pads = 1:6;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 12.9;
@@ -22,13 +22,13 @@ mfc_name = "MFC1";
 % -> Time window info
 num_runs = 3;
 num_steps = 4;      % number of steps per run
-run_length = 3480;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+run_length = 2800;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
 step_length = 120;  % seconds for NO exposure
 prepurge = 1200;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-%target_entry = 73; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 73; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
@@ -63,7 +63,7 @@ fig_pos = [200,200,fig_size];
 %% Loading Data
 load("CNT_Results_NO.mat")
 % Finding entry in struct according to given date & chip
-target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
+% target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
 
 entry_result = CNT_Results_NO(target_entry,1);
 % Show entry + addinfo field
