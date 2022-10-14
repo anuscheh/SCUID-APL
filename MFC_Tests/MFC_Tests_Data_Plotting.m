@@ -7,10 +7,10 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-10-07","Format","yyyy-MM-dd");
+target_date = datetime("2022-10-11","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 1;
-target_chip = 17;
+target_board = 0;
+target_chip = 19;
 % -- Pads info
 num_pads = 12;
 target_pads = 1:6;
@@ -28,7 +28,7 @@ prepurge = 1200;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-target_entry = 73; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 76; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
@@ -226,13 +226,13 @@ colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
 plot(ax_rh_temp,ts./3600,entry_result.boardtemp,DisplayName="Board Temperature");
-ylim([30,37])
+ylim([23.5,35])
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
 plot(ax_rh_temp,ts./3600,entry_result.rh,DisplayName="Relative Humidity");
 ylabel("Relative Humidity [%]");
-hold(ax_rh_temp,"off");
+hold(ax_rh_temp,"off"); grid on;
 if enable_title
     title(ax_rh_temp,"Relative Humidity & Board Temperature vs Time");
 end
@@ -252,7 +252,7 @@ plot(ax_temp_temp,ts./3600,entry_result.boardtemp,LineWidth=2, ...
 plot(ax_temp_temp,ts./3600,entry_result.bmetemp,LineWidth=2, ...
     DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
-ylim([30,37])
+ylim([23.5,35]); grid on;
 if enable_title
     title(ax_temp_temp,"Board Temperature & BME Temperature vs Time");
 end
@@ -287,7 +287,7 @@ if enable_title
     title(ax_rsp_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
         num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
 end
-
+grid on;
 %% == Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
 run_pick = 2;
 fig_rsp_run_norm = figure('Name', "Normalized Data & Concentration " + ...
@@ -322,6 +322,7 @@ if enable_title
     title(ax_rsp_run_norm, strcat("Normalized Sensor Response vs Time (Pads ", ...
         num2str(target_pads(1)), "-", num2str(target_pads(end)), ")"))
 end
+grid on;
 hold(ax_rsp_run_norm,"off")
 
 
@@ -359,7 +360,7 @@ for run = 1:num_runs
     ylabel(ax_rsp_blc,gas_type+" Concentration [ppm]");
     ylim(ax_rsp_blc, [0, 2])
     legend(ax_rsp_blc,'NumColumns',2)
-    hold(ax_rsp_blc,"off")
+    hold(ax_rsp_blc,"off"); grid on;
     if enable_title
     title(ax_rsp_blc, strcat("Normalized Sensor Response vs Time ", ...
         "- Run ", num2str(run), " (Pads ", ...
@@ -414,7 +415,7 @@ for i = 1:length(all_axes)
     end
 end
 set(all_figs,"WindowState","normal");
-
+grid on;
 %% Saving Figures
 asksave = input("Save all Figures? [Y/n]: ",'s');
 switch lower(asksave)
