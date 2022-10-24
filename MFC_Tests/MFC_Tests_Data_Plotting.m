@@ -9,8 +9,8 @@ clear; close all; clc;
 % -> Test Date 
 target_date = datetime("2022-10-21","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 0;
-target_chip = 18;
+target_board = 2;
+target_chip = 17;
 % -- Pads info
 num_pads = 12;
 target_pads = 1:6;
@@ -28,7 +28,7 @@ prepurge = 0;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-target_entry = 86; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 88; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
