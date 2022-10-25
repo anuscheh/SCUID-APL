@@ -3,14 +3,22 @@
 % Date Created: 8/31/2022
 % Last Updated: 8/31/2022
 
+figure(30)
+hold on
+plot(CNT_Results_NO(89).timeE(:,:)-CNT_Results_NO(89).timeE(1,:), CNT_Results_NO(89).r(:,2)./CNT_Results_NO(89).r(2371,2),'b');
+plot(CNT_Results_NO(75).timeE(:,:)-CNT_Results_NO(75).timeE(1,:), CNT_Results_NO(75).r(:,2)./CNT_Results_NO(75).r(3734,2),'m');
+plot(CNT_Results_NO(77).timeE(:,:)-CNT_Results_NO(77).timeE(1,:), CNT_Results_NO(77).r(:,2)./CNT_Results_NO(77).r(2385,2),'r');
+legend('AMES17,P2 - 24C','AMES 17,P2 - 28C','AMES 17,P2 - 32C')
+
+
 clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-10-21","Format","yyyy-MM-dd");
+target_date = datetime("2022-10-24","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 2;
-target_chip = 17;
+target_board = 0;
+target_chip = 18;
 % -- Pads info
 num_pads = 12;
 target_pads = 1:6;
@@ -22,13 +30,13 @@ mfc_name = "MFC1";
 % -> Time window info
 num_runs = 3;
 num_steps = 4;      % number of steps per run
-run_length = 4800;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
-step_length = 600;  % seconds for NO exposure
-prepurge = 0;     % seconds
+run_length = 4200;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+step_length = 720;  % seconds for NO exposure
+prepurge = 20;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-target_entry = 88; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 89; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
