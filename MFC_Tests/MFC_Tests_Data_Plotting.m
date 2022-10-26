@@ -3,12 +3,25 @@
 % Date Created: 8/31/2022
 % Last Updated: 8/31/2022
 
-figure(30)
-hold on
-plot(CNT_Results_NO(89).timeE(:,:)-CNT_Results_NO(89).timeE(1,:), CNT_Results_NO(89).r(:,2)./CNT_Results_NO(89).r(2371,2),'b');
-plot(CNT_Results_NO(75).timeE(:,:)-CNT_Results_NO(75).timeE(1,:), CNT_Results_NO(75).r(:,2)./CNT_Results_NO(75).r(3734,2),'m');
-plot(CNT_Results_NO(77).timeE(:,:)-CNT_Results_NO(77).timeE(1,:), CNT_Results_NO(77).r(:,2)./CNT_Results_NO(77).r(2385,2),'r');
-legend('AMES17,P2 - 24C','AMES 17,P2 - 28C','AMES 17,P2 - 32C')
+% example plotting by hand - leaving this here just in case we need to plot
+% something on the fly
+% figure(30)
+% hold on
+% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).r(:,2));
+% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).noppm(:,:)*100+7500,'g')
+% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).boardtemp(:,:)*100+7000,'r')
+% 
+% figure(31)
+% hold on
+% plot(CNT_Results_NO(93).timeE(:,:)-CNT_Results_NO(93).timeE(1,:), CNT_Results_NO(93).r(:,2));
+% plot(CNT_Results_NO(93).timeE(:,:)-CNT_Results_NO(93).timeE(1,:), CNT_Results_NO(93).noppm(:,:)*100+6000,'g')
+% plot(CNT_Results_NO(93).timeE(:,:)-CNT_Results_NO(93).timeE(1,:), CNT_Results_NO(93).boardtemp(:,:)*100+6000,'r')
+% 
+% figure(32)
+% hold on
+% plot(CNT_Results_NO(94).timeE(:,:)-CNT_Results_NO(94).timeE(1,:), CNT_Results_NO(94).r(:,2));
+% plot(CNT_Results_NO(94).timeE(:,:)-CNT_Results_NO(94).timeE(1,:), CNT_Results_NO(94).noppm(:,:)*100+7500,'g')
+% plot(CNT_Results_NO(94).timeE(:,:)-CNT_Results_NO(94).timeE(1,:), CNT_Results_NO(94).boardtemp(:,:)*100+7000,'r')
 
 
 clear; close all; clc;
@@ -28,15 +41,15 @@ gas_conc = 12.9;
 gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 3;
-num_steps = 4;      % number of steps per run
-run_length = 4200;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+num_runs = 1;
+num_steps = 7;      % number of steps per run
+run_length = 5040;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
 step_length = 720;  % seconds for NO exposure
-prepurge = 20;     % seconds
+prepurge = 1200;     % seconds
 min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-target_entry = 89; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 92; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
