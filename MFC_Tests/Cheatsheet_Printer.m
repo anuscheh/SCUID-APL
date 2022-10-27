@@ -46,7 +46,7 @@ ExtraComments = strings(size(TestComments));
 
 %% Write to table
 % Make newest table
-NewTable = table(EntryNumber,AddedHumidity,ChipNumber,TestComments,ExtraComments);
+NewTable = table(EntryNumber,AddedHumidity,ChipNumber,EntryDate,TestComments,ExtraComments);
 % Append newly added entries to the old sheet
 cheatsheet = "MFC_Tests_Cheatsheet.xlsx";
 if isfile(cheatsheet)
