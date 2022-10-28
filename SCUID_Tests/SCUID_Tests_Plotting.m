@@ -41,6 +41,7 @@ ts = ts - ts(1);
 % Relative Humidity Plot
 fig_rh = figure('Name','Relative Humidity');
 fig_rh.WindowState = figure_state;
+fig_rh.FileName = "RH";
 tiledlayout(1,1);
 ax_rh = nexttile;
 hold(ax_rh,'on');
@@ -55,6 +56,7 @@ hold(ax_rh,'off');
 % Temperature Plot
 fig_temp = figure('Name','Temperature');
 fig_temp.WindowState = figure_state;
+fig_temp.FileName = "Temperature";
 tiledlayout(1,1);
 ax_temp = nexttile;
 hold(ax_temp,'on');
@@ -70,6 +72,7 @@ hold(ax_temp,'off')
 % Pressure Plot
 fig_p = figure('Name','Pressure');
 fig_p.WindowState = figure_state;
+fig_p.FileName = "Pressure";
 tiledlayout(1,1);
 ax_p = nexttile;
 hold(ax_p,'on');
@@ -85,6 +88,7 @@ hold(ax_p,'off')
 % Oxygen Plot
 fig_O2 = figure('Name', "Oxygen");
 fig_O2.WindowState = figure_state;
+fig_O2.FileName = "Oxygen";
 tiledlayout(1,1);
 ax_O2 = nexttile;
 hold(ax_O2,'on');
@@ -100,6 +104,7 @@ hold(ax_p,'off')
 % Sensors 1-6 Plot
 fig_sg1 = figure('Name','Sensors 1-6');
 fig_sg1.WindowState = figure_state;
+fig_sg1.FileName = "S1-6";
 tiledlayout(1,1)
 ax_sg1 = nexttile;
 hold(ax_sg1,'on');
@@ -121,6 +126,7 @@ hold(ax_sg1,'off');
 % Sensors 7-12 Plot
 fig_sg2 = figure('Name','Sensors 7-12');
 fig_sg2.WindowState = figure_state;
+fig_sg2.FileName = "S7-12";
 tiledlayout(1,1)
 ax_sg2 = nexttile;
 hold(ax_sg2,'on');
@@ -170,8 +176,32 @@ end
 set(all_figs,"WindowState","normal");
 grid on;
 
-%% Saving figures
-if auto_save
-    % TBD: automatically save all figures into folders. 
-    % Working on folder naming scheme.
-end
+%% Saving Figures
+asksave = input("Save all Figures? [Y/n]: ",'s');
+switch lower(asksave)
+    case {"y",''}
+        plotpath = pwd + "/WaterTest_Plots";
+        datepath = "/" + datestr(test_date,'yyyy-mm-dd');
+%         chippath = "/Board" + num2str(target_board) + "_Chip" + ...
+%                    num2str(target_chip) + "_" + gas_humidity + "/";
+        savepath = plotpath + datepath;
+        if ~exist(savepath, 'dir')
+            disp("There is no such directory:");
+            disp(savepath);
+            disp("I will create the directory for you.")
+            mkdir(savepath)
+        end
+        for f = 1:length(all_figs)
+            this_filename = all_figs(f).FileName;
+            if contains(all_figs(f).FileName,".")
+                this_filename = this_filename + ".png";
+            end
+            disp("Saving: " + this_filename);
+            saveas(all_figs(f),fullfile(savepath, this_filename),'png');
+        end
+        disp("Figures saved successfully under:")
+        disp(savepath)
+        set(all_figs,"WindowState","normal");
+    otherwise
+        set(all_figs,"WindowState","normal");
+end       
