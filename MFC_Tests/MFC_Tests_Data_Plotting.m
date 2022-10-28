@@ -28,10 +28,10 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-10-26","Format","yyyy-MM-dd");
+target_date = datetime("2022-10-24","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 2;
-target_chip = 17;
+target_board = 0;
+target_chip = 18;
 % -- Pads info
 num_pads = 12;
 target_pads = 1:6;
@@ -41,15 +41,15 @@ gas_conc = 12.9;
 gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 2;
-num_steps = 3;      % number of steps per run
-run_length = 3660;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
-step_length = 120;  % seconds for NO exposure
-% prepurge = 1200;     % seconds
-min_conc = 0.5;     % Concentration of the lowest step, in [ppm].
+num_runs = 1;
+num_steps = 7;      % number of steps per run
+run_length = 5040;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+step_length = 720;  % seconds for NO exposure
+prepurge = 1200;     % seconds
+min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 
-target_entry = 97; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 92; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
