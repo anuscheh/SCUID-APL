@@ -31,7 +31,7 @@ for entry = 1:length(SCUID_Test_Results)
         break
     end
 end
-tgt_entry = 12;
+tgt_entry = 13;
 
 %% Plotting
 % Time stamp preparation
@@ -174,6 +174,7 @@ for i = 1:length(all_axes)
     end
 end
 set(all_figs,"WindowState","normal");
+set(all_figs,"Position",[0,360,1500,600])
 grid on;
 
 %% Saving Figures
