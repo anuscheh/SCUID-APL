@@ -1,6 +1,7 @@
 clear; close all; clc;
 % Loading data set
-load('CNT_Results_NO.mat')
+datafile = fullfile("../CNT_Results_NO.mat");
+load(datafile)
 last_entry = length(CNT_Results_NO);
 
 % loading/creating cheatsheet
@@ -48,21 +49,23 @@ ExtraComments = strings(size(TestComments));
 % Make newest table
 NewTable = table(EntryNumber,AddedHumidity,ChipNumber,TestComments,ExtraComments);
 % Append newly added entries to the old sheet
-cheatsheet = "MFC_Tests_Cheatsheet.xlsx";
+cheatsheet = "MFC_Data_Cheatsheet.xlsx";
 if isfile(cheatsheet)
+    disp("Found the cheatsheet in the same folder!")
     % First, read existing table and find the index of last entry
     CheatTable = readtable(cheatsheet);
     last_index = length(CheatTable.EntryNumber);
     % Then, in the new table, find the index of that last EntryNumber
     if length(NewTable.EntryNumber) > last_index
         EntriesToAppend = NewTable(last_index+1:end,:);
-        disp("These are the newly added entries this time.")
+        disp("These are the new entries.")
         disp(EntriesToAppend)
+        input("Press Enter to add them to the Cheatsheet...")
         CheatTable = [CheatTable; EntriesToAppend];
         writetable(CheatTable,cheatsheet,"WriteMode","replacefile")
         fprintf("New entries has been appended to: %s\n", cheatsheet)
     else
-        disp("No new entries to add.")
+        disp("No new entries to add. The script will terminate now.")
     end
 else
     disp("Cheatsheet not created yet. I will create it now.")
