@@ -30,11 +30,11 @@ clear; close all; clc;
 % -> Test Date 
 target_date = datetime("2022-11-03","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 1;
-target_chip = 22;
+target_board = 0;
+target_chip = 21;
 % -- Pads info
 num_pads = 12;
-target_pads = 1:6;
+target_pads = 7:12;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 12.9;
