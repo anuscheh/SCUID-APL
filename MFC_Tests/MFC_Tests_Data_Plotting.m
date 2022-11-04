@@ -3,32 +3,53 @@
 % Date Created: 8/31/2022
 % Last Updated: 8/31/2022
 
+% example plotting by hand - leaving this here just in case we need to plot
+% something on the fly
+% figure(30)
+% hold on
+% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).r(:,2));
+% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).noppm(:,:)*100+7500,'g')
+% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).boardtemp(:,:)*100+7000,'r')
+% 
+% figure(31)
+% hold on
+% plot(CNT_Results_NO(93).timeE(:,:)-CNT_Results_NO(93).timeE(1,:), CNT_Results_NO(93).r(:,2));
+% plot(CNT_Results_NO(93).timeE(:,:)-CNT_Results_NO(93).timeE(1,:), CNT_Results_NO(93).noppm(:,:)*100+6000,'g')
+% plot(CNT_Results_NO(93).timeE(:,:)-CNT_Results_NO(93).timeE(1,:), CNT_Results_NO(93).boardtemp(:,:)*100+6000,'r')
+% 
+% figure(32)
+% hold on
+% plot(CNT_Results_NO(94).timeE(:,:)-CNT_Results_NO(94).timeE(1,:), CNT_Results_NO(94).r(:,2));
+% plot(CNT_Results_NO(94).timeE(:,:)-CNT_Results_NO(94).timeE(1,:), CNT_Results_NO(94).noppm(:,:)*100+7500,'g')
+% plot(CNT_Results_NO(94).timeE(:,:)-CNT_Results_NO(94).timeE(1,:), CNT_Results_NO(94).boardtemp(:,:)*100+7000,'r')
+
+
 clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-10-18","Format","yyyy-MM-dd");
+target_date = datetime("2022-10-26","Format","yyyy-MM-dd");
 % -> Target Board & Chip
-target_board = 1;
-target_chip = 19;
+target_board = 2;
+target_chip = 17;
 % -- Pads info
 num_pads = 12;
-target_pads = 1:6;
+target_pads = 7:12;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 12.9;
-gas_humidity = "dry";
+gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 3;
-num_steps = 4;      % number of steps per run
-run_length = 4800;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
-step_length = 600;  % seconds for NO exposure
-prepurge = 0;     % seconds
-min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
+num_runs = 2;
+num_steps = 3;      % number of steps per run
+run_length = 3600;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+step_length = 120;  % seconds for NO exposure
+prepurge = 1200;     % seconds
+min_conc = 0.5;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
-
-target_entry = 81; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+temp_range = [20,30];
+target_entry = 100; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
@@ -54,7 +75,7 @@ fig_size = [1400,600]; % 21:9 aspect ratio
 % - Title Toggle
 enable_title = false;
 % - Pads not to put on the plots
-pads_to_ignore = [6];
+pads_to_ignore = [];
 
 %% Initialization
 % Setting figure state variable
@@ -63,7 +84,7 @@ fig_pos = [200,200,fig_size];
 %% Loading Data
 load("CNT_Results_NO.mat")
 % Finding entry in struct according to given date & chip
-target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
+% target_entry = get_target_entry(CNT_Results_NO,target_date,target_chip);
 
 entry_result = CNT_Results_NO(target_entry,1);
 % Show entry + addinfo field
@@ -226,7 +247,7 @@ colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
 plot(ax_rh_temp,ts./3600,entry_result.boardtemp,DisplayName="Board Temperature");
-ylim([23.5,35])
+ylim(temp_range)
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
@@ -252,7 +273,7 @@ plot(ax_temp_temp,ts./3600,entry_result.boardtemp,LineWidth=2, ...
 plot(ax_temp_temp,ts./3600,entry_result.bmetemp,LineWidth=2, ...
     DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
-ylim([23.5,35]); grid on;
+ylim(temp_range); grid on;
 if enable_title
     title(ax_temp_temp,"Board Temperature & BME Temperature vs Time");
 end
@@ -289,7 +310,7 @@ if enable_title
 end
 grid on;
 %% == Normalized Signal + Concentration vs Time (One Run,Pick Run 2)
-run_pick = 2;
+run_pick = 1;
 fig_rsp_run_norm = figure('Name', "Normalized Data & Concentration " + ...
     "vs Time - Run " + num2str(run_pick));
 fig_rsp_run_norm.FileName = filename1 + "_Run" + num2str(run_pick) + "_RNorm+Conc_Time";

@@ -1,8 +1,8 @@
 %% About This Script
 % This script reads parsed TeraTerm data and makes plots.
 % Author: Jerry Chen
-% Time Created: August 25,2022
-% Last Edited:  August 25,2022
+% Time Created: Aug 25,2022
+% Last Edited:  Oct 27,2022
 
 clear; close all; clc;
 
@@ -31,7 +31,7 @@ for entry = 1:length(SCUID_Test_Results)
         break
     end
 end
-tgt_entry = 7;
+tgt_entry = 13;
 
 %% Plotting
 % Time stamp preparation
@@ -41,6 +41,7 @@ ts = ts - ts(1);
 % Relative Humidity Plot
 fig_rh = figure('Name','Relative Humidity');
 fig_rh.WindowState = figure_state;
+fig_rh.FileName = "RH";
 tiledlayout(1,1);
 ax_rh = nexttile;
 hold(ax_rh,'on');
@@ -50,12 +51,12 @@ plot(ts,SCUID_Test_Results(tgt_entry,1).RH,'DisplayName',...
 xlabel(ax_rh,'Time [s]');
 ylabel(ax_rh,'Relative Humidity');
 legend(ax_rh,'edgecolor','none', 'location','northeast');
-%fontsize(fig_rh,20,'points');
 hold(ax_rh,'off');
 
 % Temperature Plot
 fig_temp = figure('Name','Temperature');
 fig_temp.WindowState = figure_state;
+fig_temp.FileName = "Temperature";
 tiledlayout(1,1);
 ax_temp = nexttile;
 hold(ax_temp,'on');
@@ -66,12 +67,12 @@ plot(ax_temp,ts,SCUID_Test_Results(tgt_entry,1).Temp1,'DisplayName',...
 xlabel(ax_temp,'Time [s]');
 ylabel(ax_temp,['Temperature [' char(176) 'C]']);
 legend(ax_temp,'edgecolor','none', 'location','northeast');
-%fontsize(fig_temp,20,'points');
 hold(ax_temp,'off')
 
 % Pressure Plot
 fig_p = figure('Name','Pressure');
 fig_p.WindowState = figure_state;
+fig_p.FileName = "Pressure";
 tiledlayout(1,1);
 ax_p = nexttile;
 hold(ax_p,'on');
@@ -82,56 +83,126 @@ plot(ax_p,ts,SCUID_Test_Results(tgt_entry,1).P1,'DisplayName',...
 xlabel(ax_p,'Time [s]');
 ylabel(ax_p,'Pressure [mBar]');
 legend(ax_p,'edgecolor','none', 'location','northeast');
-%fontsize(fig_p,20,'points');
+hold(ax_p,'off')
+
+% Oxygen Plot
+fig_O2 = figure('Name', "Oxygen");
+fig_O2.WindowState = figure_state;
+fig_O2.FileName = "Oxygen";
+tiledlayout(1,1);
+ax_O2 = nexttile;
+hold(ax_O2,'on');
+plot(ax_O2,ts,SCUID_Test_Results(tgt_entry,1).O2,'DisplayName',...
+    'Oxygen',LineWidth=2);
+plot(ax_O2,ts,SCUID_Test_Results(tgt_entry,1).O2Sat,'DisplayName',...
+    'Oxygen Saturation',LineWidth=2);
+xlabel(ax_O2,'Time [s]');
+ylabel(ax_O2,'Concentration [%]');
+legend(ax_O2,'edgecolor','none', 'location','northeast');
 hold(ax_p,'off')
 
 % Sensors 1-6 Plot
 fig_sg1 = figure('Name','Sensors 1-6');
 fig_sg1.WindowState = figure_state;
+fig_sg1.FileName = "S1-6";
 tiledlayout(1,1)
 ax_sg1 = nexttile;
 hold(ax_sg1,'on');
 for i = 1:6
-    plot(ax_sg1,ts,SCUID_Test_Results(tgt_entry,1).Sensors(:,i)./SCUID_Test_Results(tgt_entry,1).Sensors(1,i),...
+    non0 = find(SCUID_Test_Results(tgt_entry,1).Sensors(:,i));
+    if isempty(non0)
+        non0val = 1;
+    else
+    non0val = SCUID_Test_Results(tgt_entry,1).Sensors(non0(1,1),i);
+    end
+    plot(ax_sg1,ts,SCUID_Test_Results(tgt_entry,1).Sensors(:,i)./non0val,...
         'DisplayName',['Sensor Pad ' num2str(i)]);
 end
 xlabel(ax_sg1,'Time [s]');
 ylabel(ax_sg1,"Response")
 legend(ax_sg1,'edgecolor','none', 'location','northeast');
-%fontsize(fig_sg1,20,'points');
 hold(ax_sg1,'off');
 
 % Sensors 7-12 Plot
 fig_sg2 = figure('Name','Sensors 7-12');
 fig_sg2.WindowState = figure_state;
+fig_sg2.FileName = "S7-12";
 tiledlayout(1,1)
 ax_sg2 = nexttile;
 hold(ax_sg2,'on');
 for i = 7:12
-    plot(ax_sg2,ts,SCUID_Test_Results(tgt_entry,1).Sensors(:,i)./SCUID_Test_Results(tgt_entry,1).Sensors(1,i),...
+    non0 = find(SCUID_Test_Results(tgt_entry,1).Sensors(:,i));
+    if isempty(non0)
+        non0val = 1;
+    else
+    non0val = SCUID_Test_Results(tgt_entry,1).Sensors(non0(1,1),i);
+    end
+    plot(ax_sg2,ts,SCUID_Test_Results(tgt_entry,1).Sensors(:,i)./non0val,...
         'DisplayName',['Sensor Pad ' num2str(i)]);
 end
 xlabel(ax_sg2,'Time [s]');
 ylabel(ax_sg2,"Response")
 legend(ax_sg2,'edgecolor','none', 'location','northeast');
-%fontsize(fig_sg2,20,'points');
 hold(ax_sg2,'off');
 
-% Plotting injection x lines
-gas_type = SCUID_Test_Results(tgt_entry,1).GasType;
-for i = 1:length(SCUID_Test_Results(tgt_entry,1).InjectionTime)
-    time_inj = SCUID_Test_Results(tgt_entry,1).InjectionTime(i,1);
-    time_inj_ue = convertTo(time_inj,'posixtime');
-    xline_pos = time_inj_ue - SCUID_Test_Results(tgt_entry,1).TimeUE(1);
+% Plotting events x lines
+events = SCUID_Test_Results(tgt_entry,1).Events;
+for i = 1:length(SCUID_Test_Results(tgt_entry,1).EventTimes)
+    event = SCUID_Test_Results(tgt_entry,1).Events(i,1);
+    event_time = SCUID_Test_Results(tgt_entry,1).EventTimes(i,1);
+    event_time_ue = convertTo(event_time,'posixtime');
+    xline_pos = event_time_ue - SCUID_Test_Results(tgt_entry,1).TimeUE(1);
     for ax = [ax_rh ax_temp ax_p ax_sg1 ax_sg2]
-        display_name = strcat(gas_type," Injection ",num2str(i));
-        xline(ax,xline_pos,'-',display_name)%,...
-            %FontSize=20,LineWidth=2,HandleVisibility='off')
+        xline(ax,xline_pos,'-',event,'HandleVisibility','off')
     end
 end
 
-%% Saving figures
-if auto_save
-    % TBD: automatically save all figures into folders. 
-    % Working on folder naming scheme.
+%% Overall Plot Format Settings
+all_figs = findall(groot,'type','figure');
+all_axes = findall(all_figs,'type','axes');
+all_lines = findall(all_figs,'Type','Line');
+set(all_axes,'FontSize',20, 'box','off')
+all_lgds = findall(all_figs,'type','legend');
+set(all_lgds,'edgecolor','none', 'location','southeast');
+set(all_lines, 'LineWidth',2, 'MarkerSize',36);
+% Setting all the y-axes to black
+for i = 1:length(all_axes)
+    ax = all_axes(i);
+%     disp(length(ax.YAxis))
+    for j = 1:length(ax.YAxis)
+        ax.YAxis(j).Color = 'k';
+    end
 end
+set(all_figs,"WindowState","normal");
+set(all_figs,"Position",[0,360,1500,600])
+grid on;
+
+%% Saving Figures
+asksave = input("Save all Figures? [Y/n]: ",'s');
+switch lower(asksave)
+    case {"y",''}
+        plotpath = pwd + "/WaterTest_Plots";
+        datepath = "/" + datestr(test_date,'yyyy-mm-dd');
+%         chippath = "/Board" + num2str(target_board) + "_Chip" + ...
+%                    num2str(target_chip) + "_" + gas_humidity + "/";
+        savepath = plotpath + datepath;
+        if ~exist(savepath, 'dir')
+            disp("There is no such directory:");
+            disp(savepath);
+            disp("I will create the directory for you.")
+            mkdir(savepath)
+        end
+        for f = 1:length(all_figs)
+            this_filename = all_figs(f).FileName;
+            if contains(all_figs(f).FileName,".")
+                this_filename = this_filename + ".png";
+            end
+            disp("Saving: " + this_filename);
+            saveas(all_figs(f),fullfile(savepath, this_filename),'png');
+        end
+        disp("Figures saved successfully under:")
+        disp(savepath)
+        set(all_figs,"WindowState","normal");
+    otherwise
+        set(all_figs,"WindowState","normal");
+end       

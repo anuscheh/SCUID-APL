@@ -232,3 +232,69 @@ xline(28,'--',{'B'})
 xline(33,'--',{'B+M'})
 xline(39,'--',{'M'})
 xline(44,'--',{'B+M'})
+
+%% _______________________ Oct 20th
+%clear; close all; clc;
+load("SCUID_Test_Results.mat")
+entry = 11;
+figure(80)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, SCUID_Test_Results(entry).P1(:,:))
+xlabel('time [min]')
+ylabel('pressure [mbar]')
+title('Oct 20th, AMES 5')
+
+
+figure(71)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, SCUID_Test_Results(entry).RH(:,:))
+xlabel('time [min]')
+ylabel('RH [%]')
+title('Oct 20th, AMES 5')
+
+
+figure(72)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, SCUID_Test_Results(entry).Temp1(:,:))
+xlabel('time [min]')
+ylabel('Board Temperature [^o C]')
+title('Oct 20th, AMES 5')
+
+
+figure(73)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, SCUID_Test_Results(entry).Sensors(:,1:6)./1000)
+xlabel('time [min]')
+ylabel('Resistance [Ohm]')
+title('Oct 20th, AMES 5')
+
+
+figure(74)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, SCUID_Test_Results(entry).Sensors(:,7:12)./1000)
+xlabel('time [min]')
+ylabel('Resistance [Ohm]')
+title('Oct 20th, AMES 5')
+
+figure(75)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, O2_sat(:,:))
+xlabel('time [min]')
+ylabel('O2 Saturation [%]')
+title('Oct 20th, AMES 5')
+
+figure(76)
+hold on
+plot((SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60, O2_col(:,:))
+xlabel('time [min]')
+ylabel('O2  [%]')
+title('Oct 20th, AMES 5')
+
+figure(77)
+hold on
+plot(O2_col(:,:))
+xlabel('time [min]')
+ylabel('O2  [%]')
+title('Oct 20th, AMES 5')
+
+t_O2_fit=(SCUID_Test_Results(entry).TimeUE(:,:)-SCUID_Test_Results(entry).TimeUE(6,:))./60;
