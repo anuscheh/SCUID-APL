@@ -1,0 +1,17 @@
+File crreated at: 11/7/2022 9:34 AM
+Proc. board firmwares: [0] -5, [1] -5, [2] -5, [3] -5, [4] -5
+
+User: Anuscheh
+
+Sensor Chemistries:
+AMES 21
+C8,
+COM 40
+
+Notes:
+Testing N2O under humidity PermSelect PG2. Room temperature. AH21: 20min purge, then 3 steps at 2 min, followed by 10 min purge each. Starting at 500ppb.N2O_120sccmflow_checkout_500_1000_ppb_2022_11_07.ini
+
+Columns:
+Epoch Time (s), 	BME280 Temp. (degC), 	BME280 RH (%), 	SI5071 Temp. (degC), 	MFC0 Flow measured (sccm N2), 	MFC1 Flow measured (sccm N2), 	MFC2 Flow measured (sccm Air), 	MFC3 Flow measured (sccm N2), 	A1 (Ohm), 	A2 (Ohm), 	A3 (Ohm), 	A4 (Ohm), 	A5 (Ohm), 	A6 (Ohm), 	A7 (Ohm), 	A8 (Ohm), 	A9 (Ohm), 	A10 (Ohm), 	A11 (Ohm), 	A12 (Ohm), 	Relay K0 State Measured (0 = open), 	Relay K1 State Measured (0 = open), 	Relay K2 State Measured (0 = open), 	Relay K3 State Measured (0 = open), 	Relay K4 State Measured (0 = open), 	Relay K5 State Measured (0 = open), 	Relay K6 State Measured (0 = open), 	Relay K7 State Measured (0 = open), 	MFC0 Flow setpoint (sccm N2), 	MFC1 Flow setpoint (sccm N2), 	MFC2 Flow setpoint (sccm Air), 	MFC3 Flow setpoint (sccm N2), 	Relay K0 State setpoint (0 = open), 	Relay K1 State setpoint (0 = open), 	Relay K2 State setpoint (0 = open), 	Relay K3 State setpoint (0 = open), 	Relay K4 State setpoint (0 = open), 	Relay K5 State setpoint (0 = open), 	Relay K6 State setpoint (0 = open), 	Relay K7 State setpoint (0 = open)
+******
+3750658472.227	 22.33	 64.44	 22.73	 0.000	 0.000	 0.000	 0.000	 0	 2	 4	 6	 8	 10	 12	 101	 102	 103	 104	 105	 106	 107	 108	 109	 110	 111	 112	 0	 0	 0	 1	 1	 1	 1	 1	 0.000	 0.000	 0.000	 120.000	 0	 0	 0	 1	 1	 1	 1	 1
