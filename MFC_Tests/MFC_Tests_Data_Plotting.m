@@ -241,17 +241,17 @@ fig_rh_temp.Position = fig_pos;
 tiledlayout(1,1);
 ax_rh_temp = nexttile;
 hold(ax_rh_temp,"on");
-xlabel(ax_rh_temp,"Time [h]");
+xlabel(ax_rh_temp,"Time [min]");
 legend(ax_rh_temp);
 colororder([0.8500 0.3250 0.0980; 0 0.4470 0.7410]) % Orange and Blue
 % Temp on left y axis
 yyaxis("left");
-plot(ax_rh_temp,ts./3600,entry_result.boardtemp,DisplayName="Board Temperature");
+plot(ax_rh_temp,ts./60,entry_result.boardtemp,DisplayName="Board Temperature");
 ylim(temp_range)
 ylabel(strcat("Temperature [",char(176),"C]"));
 % RH on right y axis
 yyaxis("right");
-plot(ax_rh_temp,ts./3600,entry_result.rh,DisplayName="Relative Humidity");
+plot(ax_rh_temp,ts./60,entry_result.rh,DisplayName="Relative Humidity");
 ylabel("Relative Humidity [%]");
 hold(ax_rh_temp,"off"); grid on;
 if enable_title
@@ -265,12 +265,12 @@ fig_temp_temp.Position = fig_pos;
 tiledlayout(1,1);
 ax_temp_temp = nexttile;
 hold(ax_temp_temp,"on");
-xlabel(ax_temp_temp,"Time [h]");
+xlabel(ax_temp_temp,"Time [min]");
 ylabel(strcat("Temperature [",char(176),"C]"));
 legend(ax_temp_temp);
-plot(ax_temp_temp,ts./3600,entry_result.boardtemp,LineWidth=2, ...
+plot(ax_temp_temp,ts./60,entry_result.boardtemp,LineWidth=2, ...
     DisplayName="Board Temperature");
-plot(ax_temp_temp,ts./3600,entry_result.bmetemp,LineWidth=2, ...
+plot(ax_temp_temp,ts./60,entry_result.bmetemp,LineWidth=2, ...
     DisplayName="BME Temperature");
 hold(ax_temp_temp,"off");
 ylim(temp_range); grid on;
@@ -285,7 +285,7 @@ fig_rsp_norm.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_norm = nexttile;
 hold(ax_rsp_norm,"on");
-xlabel(ax_rsp_norm,"Time [h]");
+xlabel(ax_rsp_norm,"Time [min]");
 % Left y axis for response
 yyaxis(ax_rsp_norm,"left");
 for pad = target_pads
@@ -293,14 +293,14 @@ for pad = target_pads
         continue
     end
     r0 = r(stp_i(1,1)-5,pad);
-    plot(ax_rsp_norm,ts./3600,r(:,pad)/r0,...
+    plot(ax_rsp_norm,ts./60,r(:,pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
 colororder(ax_rsp_norm,'default');
 ylabel(ax_rsp_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_norm,"right");
-plot(ax_rsp_norm,ts./3600,conc_clean,DisplayName=gas_type+" Concentration", ...
+plot(ax_rsp_norm,ts./60,conc_clean,DisplayName=gas_type+" Concentration", ...
     LineStyle=':',Color="k");
 ylabel(ax_rsp_norm,gas_type+" Concentration [ppm]");
 legend(ax_rsp_norm,'NumColumns',2);
@@ -318,7 +318,7 @@ fig_rsp_run_norm.Position = fig_pos;
 tiledlayout(1,1);
 ax_rsp_run_norm = nexttile;
 hold(ax_rsp_run_norm,"on");
-xlabel(ax_rsp_run_norm,"Time [h]");
+xlabel(ax_rsp_run_norm,"Time [min]");
 % Left y axis for response
 yyaxis(ax_rsp_run_norm,"left");
 for pad = target_pads
@@ -326,7 +326,7 @@ for pad = target_pads
         continue
     end
     r0 = r(stp_i(1,run_pick)-5,pad);
-    plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
+    plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./60, ...
         r(run_ranges{run_pick},pad)/r0,...
         DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2);
 end
@@ -334,7 +334,7 @@ colororder(ax_rsp_run_norm,'default');
 ylabel(ax_rsp_run_norm,"R/R_0 [-]");
 % Right y axis for concentration
 yyaxis(ax_rsp_run_norm,"right");
-plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./3600, ...
+plot(ax_rsp_run_norm,ts(run_ranges{run_pick})./60, ...
     conc_clean(run_ranges{run_pick}),DisplayName=gas_type+" Concentration", ...
     Color="k",LineStyle=":");
 ylabel(ax_rsp_run_norm,gas_type+" Concentration [ppm]");
@@ -358,14 +358,14 @@ for run = 1:num_runs
     tiledlayout(1,1);
     ax_rsp_blc = nexttile;
     hold(ax_rsp_blc,"on");
-    xlabel(ax_rsp_blc,"Time [h]");
+    xlabel(ax_rsp_blc,"Time [min]");
     % Left y axis for response
     yyaxis(ax_rsp_blc,"left");    
     for pad = target_pads
         if ismember(pad,pads_to_ignore)
             continue
         end
-        plot(ax_rsp_blc,ts(run_ranges{run,1})./3600,r_blc(run_ranges{run,1}, pad), ...
+        plot(ax_rsp_blc,ts(run_ranges{run,1})./60,r_blc(run_ranges{run,1}, pad), ...
             DisplayName=strcat("Pad ",num2str(pad)),LineWidth=2,LineStyle="-");
     end
     colororder(ax_rsp_blc,"default")
@@ -374,9 +374,9 @@ for run = 1:num_runs
 %     ylim(ax_rsp_blc, [-2e-3, 7e-3])
     % Right y axis for concentration
     yyaxis(ax_rsp_blc,"right")
-    plot(ax_rsp_blc,ts(run_ranges{run})./3600,conc_clean(run_ranges{run}), ...
+    plot(ax_rsp_blc,ts(run_ranges{run})./60,conc_clean(run_ranges{run}), ...
         DisplayName=gas_type+" Concentration",Color="k",LineStyle=":");
-%     plot(ax_rsp_blc,ts(run_ranges{run})./3600,entry_result.rh(run_ranges{run}), ...
+%     plot(ax_rsp_blc,ts(run_ranges{run})./60,entry_result.rh(run_ranges{run}), ...
 %         DisplayName=gas_type+" Concentration",Color="k",LineStyle=":");
     ylabel(ax_rsp_blc,gas_type+" Concentration [ppm]");
     ylim(ax_rsp_blc, [0, 2])
