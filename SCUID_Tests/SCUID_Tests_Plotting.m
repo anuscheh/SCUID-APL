@@ -20,18 +20,48 @@ auto_save = false;
 
 %% Loading Data
 load('SCUID_Test_Results.mat')
+disp("Data file loaded!")
+latest_entry = length(SCUID_Test_Results);
+fprintf("The latest entry is No. %i on date: %s.\n", latest_entry, ...
+        string(SCUID_Test_Results(latest_entry).TestDate,"yyyy-MM-dd"))
+use_latest = input("Do you want to use the latest entry? [Y/n]: ","s");
 
-% Change this date to the date of test you want
-% test_date = datetime('2022-09-01');
-test_date = datetime(input("When was the data from? [YYYY-MM-DD]: ","s"));
-
-for entry = 1:length(SCUID_Test_Results)
-    if SCUID_Test_Results(entry,1).TestDate == test_date
-        tgt_entry = entry;
-        break
+entry_selected = false;
+while ~entry_selected
+    if isempty(use_latest) || strcmp(use_latest,"y")
+        tgt_entry = latest_entry;
+        entry_selected = true;
+    elseif strcmp(use_latest,"n")
+        disp("Here are the 10 latest entries:")
+        PrintTenLatest(SCUID_Test_Results)
+        disp("Which one do you want to use? ")
+        disp("To use older entries, please check the .mat file.")
+        choice = input("Please input entry number (integer only): ");
+        entry_valid = false;
+        while ~entry_valid
+            if choice >=1 && choice <= latest_entry
+                fprintf("You picked entry %i.\n",choice)
+                tgt_entry = choice;
+                entry_valid = true;
+            else
+                disp("Invalid entry number! Please try again.")
+            end
+        end
+        entry_selected = true;
+    else
+        disp("Input invalid!")
     end
 end
-tgt_entry = 13;
+
+% test_date = datetime(input("When was the data from? [YYYY-MM-DD]: ","s"));
+
+% for entry = 1:length(SCUID_Test_Results)
+%     if SCUID_Test_Results(entry,1).TestDate == test_date
+%         tgt_entry = entry;
+%         break
+%     end
+% end
+% tgt_entry = 13;
 
 %% Plotting
 % Time stamp preparation
@@ -178,13 +208,12 @@ set(all_figs,"Position",[0,360,1500,600])
 grid on;
 
 %% Saving Figures
+test_date = string(SCUID_Test_Results(tgt_entry).TestDate,"uuuu-MM-dd");
 asksave = input("Save all Figures? [Y/n]: ",'s');
 switch lower(asksave)
     case {"y",''}
         plotpath = pwd + "/WaterTest_Plots";
-        datepath = "/" + datestr(test_date,'yyyy-mm-dd');
-%         chippath = "/Board" + num2str(target_board) + "_Chip" + ...
-%                    num2str(target_chip) + "_" + gas_humidity + "/";
+        datepath = "/Test_" + num2str(tgt_entry) + "_" + test_date;
         savepath = plotpath + datepath;
         if ~exist(savepath, 'dir')
             disp("There is no such directory:");
@@ -197,6 +226,8 @@ switch lower(asksave)
             if contains(all_figs(f).FileName,".")
                 this_filename = this_filename + ".png";
             end
+            this_filename = "/Test_" + num2str(tgt_entry,'%03d') + "_" + this_filename;
+                                    
             disp("Saving: " + this_filename);
             saveas(all_figs(f),fullfile(savepath, this_filename),'png');
         end
@@ -206,3 +237,25 @@ switch lower(asksave)
     otherwise
         set(all_figs,"WindowState","normal");
 end       
+
+
+%% Custom Functions
+function PrintTenLatest(DataStructure)
+    fprintf("\t\t\tEntry #\t\tTest Date\tChip\tNumber of Events\n")
+    latest = length(DataStructure);
+    if latest >= 10
+        tenth = latest - 9;
+    else
+        tenth = 1;
+    end
+    for i = latest:-1:tenth
+        date = string(DataStructure(i).TestDate,"yyyy-MM-dd");
+        chip = DataStructure(i).Chip;
+        event_count = length(DataStructure(i).Events);
+        if i==latest
+            fprintf("LATEST=>\t%i\t\t\t%s\t%s\t%i\t\n",i,date,chip,event_count)
+        else 
+            fprintf("\t\t\t%i\t\t\t%s\t%s\t%i\t\n",i,date,chip,event_count)
+        end
+    end
+end
