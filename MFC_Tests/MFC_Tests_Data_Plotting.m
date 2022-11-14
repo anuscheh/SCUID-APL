@@ -28,7 +28,7 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-11-08","Format","yyyy-MM-dd");
+target_date = datetime("2022-11-10","Format","yyyy-MM-dd");
 % -> Target Board & Chip
 target_board = 0;
 target_chip = 22;
@@ -41,15 +41,15 @@ gas_conc = 12.9;
 gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 1;
+num_runs = 3;
 num_steps = 3;      % number of steps per run
-run_length = 2880;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+run_length = 3600;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
 step_length = 120;  % seconds for NO exposure
-prepurge = 1200;     % seconds
-min_conc = 0.1;     % Concentration of the lowest step, in [ppm].
+prepurge = 600;     % seconds
+min_conc = 0.4;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 temp_range = [20,30];
-target_entry = 108; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 110; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
@@ -111,6 +111,9 @@ end
 
 % Replacing all the NaN values with 0
 conc_clean(isnan(conc_clean)) = 0;
+
+% Make sure the start of the array are all zero.
+conc_clean(1:20) = 0;
 
 % Separating the entire data into individual runs
 run_ranges = cell(num_runs,1);
@@ -184,7 +187,7 @@ for run = 1:num_runs
         Y = r_norm_pad(non_expo_indices);
 %         Y_mean = mean(Y);
 %         Y_cen = Y - Y_mean;
-        [r_fit_pad, gof] = fit(X,Y,'poly5'); % <--- FEEL FREE TO TWEAK!!!
+        [r_fit_pad, gof] = fit(X,Y,'exp1'); % <--- FEEL FREE TO TWEAK!!!
         baseline_pad = r_fit_pad(ts_run);
         % Subtracting baseline from original response data
         r_blc(run_ranges{run,1},pad) = r_norm_pad - baseline_pad;
