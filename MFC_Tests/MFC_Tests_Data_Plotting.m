@@ -34,7 +34,7 @@ target_board = 0;
 target_chip = 22;
 % -- Pads info
 num_pads = 12;
-target_pads = 1:6;
+target_pads = 7:12;
 % -> Gas info
 gas_type = "N2O";
 gas_conc = 12.9;
@@ -111,6 +111,9 @@ end
 
 % Replacing all the NaN values with 0
 conc_clean(isnan(conc_clean)) = 0;
+
+% Make sure the start of the array are all zero.
+conc_clean(1:20) = 0;
 
 % Separating the entire data into individual runs
 run_ranges = cell(num_runs,1);
