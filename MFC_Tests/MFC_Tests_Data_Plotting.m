@@ -28,36 +28,34 @@ clear; close all; clc;
 
 %% Basic Test Information <= MUST CHANGE EVERYTIME!
 % -> Test Date 
-target_date = datetime("2022-11-11","Format","yyyy-MM-dd");
+target_date = datetime("2022-11-18","Format","yyyy-MM-dd");
 % -> Target Board & Chip
 target_board = 0;
-target_chip = 22;
+target_chip = 23;
 % -- Pads info
 num_pads = 12;
-target_pads = 7:12;
+target_pads = 1:6;
 % -> Gas info
 gas_type = "NO";
 gas_conc = 12.9;
 gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 2;
-num_steps = 3;      % number of steps per run
-run_length = 7000;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
+num_runs = 1;
+num_steps = 2;      % number of steps per run
+run_length = 6000;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
 step_length = 120;  % seconds for NO exposure
 prepurge = 600;     % seconds
 min_conc = 0.5;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 temp_range = [20,30];
-target_entry = 111; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 112; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
-step_rise_auto_detect = true;
+step_rise_auto_detect = false;
 % - Manually input indices of rising edges below! 
-rising_edges = [1390,3030,4699,6419,8152,9890,16634, ...
-14323,15860,17513,19226,20968,22693,24433, ...
-27105,28665,30320,32049,33773,35515,37242];  % 09-10-2022
+rising_edges = [600,1320];  % 09-10-2022
 % - Automatically find gas exposure ranges from gas concentration readings.
 %   If set to false, also specify the desired sample length in seconds.
 auto_expo_range = false;
