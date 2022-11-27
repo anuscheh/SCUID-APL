@@ -7,8 +7,8 @@ close all; clear; clc; % clean your workspace first becuase you can import data 
 %_________________________
 %% Enter data 
 % date and info
-addinfo = "11/18/2022 - Board0 - NO, RH Permselect 0.5%O2"; %enter any information about this test bthat is not contained in the headerfile
-chip = 23; %enter chip number (E.G. 1 for AMES1, etc.)
+addinfo = "11/23/2022 - Board2 - O2, RH Permselect"; %enter any information about this test bthat is not contained in the headerfile
+chip = 21; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
 % MFC0 - what gas bottle is connected?

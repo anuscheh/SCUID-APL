@@ -81,7 +81,7 @@ plot(ts,SCUID_Test_Results(tgt_entry,1).RH,'DisplayName',...
     'Relative Humidity',LineWidth=2);
 xlabel(ax_rh,'Time [min]');
 ylabel(ax_rh,'Relative Humidity');
-legend(ax_rh,'edgecolor','none', 'location','northeast');
+legend(ax_rh,'edgecolor','none', 'location','southwest');
 hold(ax_rh,'off');
 
 % Temperature Plot
@@ -97,7 +97,7 @@ plot(ax_temp,ts,SCUID_Test_Results(tgt_entry,1).Temp1,'DisplayName',...
     'Temperature 1',LineWidth=2);
 xlabel(ax_temp,'Time [min]');
 ylabel(ax_temp,['Temperature [' char(176) 'C]']);
-legend(ax_temp,'edgecolor','none', 'location','northeast');
+legend(ax_temp,'edgecolor','none', 'location','southwest');
 hold(ax_temp,'off')
 
 % Pressure Plot
@@ -113,7 +113,7 @@ plot(ax_p,ts,SCUID_Test_Results(tgt_entry,1).P1,'DisplayName',...
     'Pressure 1',LineWidth=2);
 xlabel(ax_p,'Time [min]');
 ylabel(ax_p,'Pressure [mBar]');
-legend(ax_p,'edgecolor','none', 'location','northeast');
+legend(ax_p,'edgecolor','none', 'location','southwest');
 hold(ax_p,'off')
 
 % Oxygen Plot
@@ -129,7 +129,7 @@ plot(ax_O2,ts,SCUID_Test_Results(tgt_entry,1).O2Sat,'DisplayName',...
     'Oxygen Saturation',LineWidth=2);
 xlabel(ax_O2,'Time [min]');
 ylabel(ax_O2,'Concentration [%]');
-legend(ax_O2,'edgecolor','none', 'location','northeast');
+legend(ax_O2,'edgecolor','none', 'location','southwest');
 hold(ax_p,'off')
 
 % Sensors 1-6 Plot
@@ -151,7 +151,7 @@ for i = 1:6
 end
 xlabel(ax_sg1,'Time [min]');
 ylabel(ax_sg1,"Response")
-legend(ax_sg1,'edgecolor','none', 'location','northeast');
+legend(ax_sg1,'edgecolor','none', 'location','southwest');
 hold(ax_sg1,'off');
 
 % Sensors 7-12 Plot
@@ -173,7 +173,7 @@ for i = 7:12
 end
 xlabel(ax_sg2,'Time [min]');
 ylabel(ax_sg2,"Response")
-legend(ax_sg2,'edgecolor','none', 'location','northeast');
+legend(ax_sg2,'edgecolor','none', 'location','southwest');
 hold(ax_sg2,'off');
 
 % Plotting events x lines
@@ -183,7 +183,7 @@ for i = 1:length(SCUID_Test_Results(tgt_entry,1).EventTimes)
     event_time = SCUID_Test_Results(tgt_entry,1).EventTimes(i,1);
     event_time_ue = convertTo(event_time,'posixtime');
     xline_pos = event_time_ue - SCUID_Test_Results(tgt_entry,1).TimeUE(1);
-    for ax = [ax_rh ax_temp ax_p ax_sg1 ax_sg2]
+    for ax = [ax_rh ax_temp ax_p ax_O2 ax_sg1 ax_sg2]
         xline(ax,xline_pos./60,'-',event,'HandleVisibility','off') % in Minutes
     end
 end
