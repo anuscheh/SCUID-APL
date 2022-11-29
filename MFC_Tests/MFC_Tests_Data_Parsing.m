@@ -16,8 +16,8 @@ gas1 = "NO";
 Gas1Conc = 104;%210;%12.5;%104;[ppm] in gas bottle (source)
 
 % MFC1 - what gas bottle is connected?
-gas2 = "NO";
-Gas2Conc = 12.9;
+gas2 = "O2";
+Gas2Conc = 23e4;%12.9; 
 
 %% load data files and struct ==================================================================
 
