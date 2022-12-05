@@ -5,11 +5,14 @@
 
 % example plotting by hand - leaving this here just in case we need to plot
 % something on the fly
-% figure(30)
-% hold on
-% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).r(:,2));
-% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).noppm(:,:)*100+7500,'g')
-% plot(CNT_Results_NO(92).timeE(:,:)-CNT_Results_NO(92).timeE(1,:), CNT_Results_NO(92).boardtemp(:,:)*100+7000,'r')
+figure(30)
+hold on
+plot(CNT_Results_NO(116).timeE(:,:)-CNT_Results_NO(116).timeE(1,:), CNT_Results_NO(116).r(:,1:6)./CNT_Results_NO(116).r(800,1:6));
+legend('Pad 1','Pad 2','Pad 3','Pad 4','Pad 5','Pad 6')
+
+figure(31); 
+plot(CNT_Results_NO(116).timeE(:,:)-CNT_Results_NO(116).timeE(1,:), CNT_Results_NO(116).r(:,1:6)./CNT_Results_NO(116).r(800,1:6))
+% plot(CNT_Results_NO(116).timeE(:,:)-CNT_Results_NO(116).timeE(1,:), CNT_Results_NO(116).boardtemp(:,:)*100+7000,'r')
 % 
 % figure(31)
 % hold on
@@ -37,23 +40,23 @@ num_pads = 12;
 target_pads = 1:6;
 % -> Gas info
 gas_type = "NO";
-gas_conc = 12.9;
+gas_conc = 23e4;%12.9;
 gas_humidity = "RH";
 mfc_name = "MFC1";
 % -> Time window info
-num_runs = 2;
-num_steps = 4;      % number of steps per run
+num_runs = 1;
+num_steps = 1;      % number of steps per run
 run_length = 7000;  % can be calculated from flow files; total run length in seconds, plus 1/2 of the purge in between runs.
 step_length = 120;  % seconds for NO exposure
 prepurge = 600;     % seconds
 min_conc = 0.5;     % Concentration of the lowest step, in [ppm].
 sample_rate = 2;    % How many samples per second?
 temp_range = [20,30];
-target_entry = 113; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
+target_entry = 116; % <<<<<<<<<<<< CHANGE THIS, this is the row in the struct file we want to evaluate
 
 %% Data Processing Options (Only Change When Needed!)
 % Automatically detect rising edge of concentration data.
-step_rise_auto_detect = false;
+step_rise_auto_detect = true;
 % - Manually input indices of rising edges below! 
 rising_edges = [600,1320];  % 09-10-2022
 % - Automatically find gas exposure ranges from gas concentration readings.
@@ -141,22 +144,22 @@ else
 end
 
 % Checking total number of steps
-if size(stp_i,1) * size(stp_i,2) ~= num_steps*num_runs
-    disp("Error: failed to get the corretc total number of steps!")
-    return
-end
-
-% Reshaping these vectors into 3 columns for 3 runs with 5 steps each.
-stp_i = reshape(stp_i,num_steps,num_runs);
-stp_f = reshape(stp_f,num_steps,num_runs);
-
-% Testing if number of steps matches designed
-if isequal(size(stp_i), [num_steps num_runs])
-    disp("Detected step starting indices matches actual steps!")
-else
-    disp("Detected step starting indices DOES NOT match actual steps!")
-    return
-end
+% if size(stp_i,1) * size(stp_i,2) ~= num_steps*num_runs
+%     disp("Error: failed to get the corretc total number of steps!")
+%     return
+% end
+% 
+% % Reshaping these vectors into 3 columns for 3 runs with 5 steps each.
+% stp_i = reshape(stp_i,num_steps,num_runs);
+% stp_f = reshape(stp_f,num_steps,num_runs);
+% 
+% % Testing if number of steps matches designed
+% if isequal(size(stp_i), [num_steps num_runs])
+%     disp("Detected step starting indices matches actual steps!")
+% else
+%     disp("Detected step starting indices DOES NOT match actual steps!")
+%     return
+% end
 
 % Performing Moving Mean
 r = entry_result.r;
@@ -164,53 +167,53 @@ if enable_movmean
     r = movmean(r,15,1);
 end
 
-% Performing Baseline Correction for each run
-r_blc = r;
-for run = 1:num_runs
-    % Time stamps for this run
-    ts_run = ts(run_ranges{run,1});
-    % Indices corresponding to non-exposure
-    % conc_run = conc_clean(run_ranges{run,1});
-    conc_run = conc_clean(run_ranges{run,1});
-    non_expo_indices = find(~conc_run);
-    % baseline correction for each pad
-    for pad = target_pads
-        % Finding baseline by fitting to part of response with no exposure
-        X = ts_run(non_expo_indices);
-        r0_pad = r(stp_i(1,run)-5,pad);
-        r_norm_pad = (r(run_ranges{run,1},pad))/r0_pad;
-        Y = r_norm_pad(non_expo_indices);
-%         Y_mean = mean(Y);
-%         Y_cen = Y - Y_mean;
-        [r_fit_pad, gof] = fit(X,Y,'poly5'); % <--- FEEL FREE TO TWEAK!!!
-        baseline_pad = r_fit_pad(ts_run);
-        % Subtracting baseline from original response data
-        r_blc(run_ranges{run,1},pad) = r_norm_pad - baseline_pad;
-    end
-end
+% % Performing Baseline Correction for each run
+% r_blc = r;
+% for run = 1:num_runs
+%     % Time stamps for this run
+%     ts_run = ts(run_ranges{run,1});
+%     % Indices corresponding to non-exposure
+%     % conc_run = conc_clean(run_ranges{run,1});
+%     conc_run = conc_clean(run_ranges{run,1});
+%     non_expo_indices = find(~conc_run);
+%     % baseline correction for each pad
+%     for pad = target_pads
+%         % Finding baseline by fitting to part of response with no exposure
+%         X = ts_run(non_expo_indices);
+%         r0_pad = r(stp_i(1,run)-5,pad);
+%         r_norm_pad = (r(run_ranges{run,1},pad))/r0_pad;
+%         Y = r_norm_pad(non_expo_indices);
+% %         Y_mean = mean(Y);
+% %         Y_cen = Y - Y_mean;
+%         [r_fit_pad, gof] = fit(X,Y,'poly5'); % <--- FEEL FREE TO TWEAK!!!
+%         baseline_pad = r_fit_pad(ts_run);
+%         % Subtracting baseline from original response data
+%         r_blc(run_ranges{run,1},pad) = r_norm_pad - baseline_pad;
+%     end
+% end
 
-% Calculating average concentration within each exposure step
-% and response at the sample point within each step (at 3 mins)
-conc_stp_avg = zeros(size(stp_i));
-for run = 1:num_runs
-    for step = 1:num_steps
-        sample_range = stp_i(step,run):stp_f(step,run);
-        conc_stp_avg(step,run) = mean(conc_clean(sample_range));
-    end
-end
+% % Calculating average concentration within each exposure step
+% % and response at the sample point within each step (at 3 mins)
+% conc_stp_avg = zeros(size(stp_i));
+% for run = 1:num_runs
+%     for step = 1:num_steps
+%         sample_range = stp_i(step,run):stp_f(step,run);
+%         conc_stp_avg(step,run) = mean(conc_clean(sample_range));
+%     end
+% end
 
-% Finding sample values of baseline-corrected rsponse to be used in the 
-% response vs concentration plot
-r_samp_locs = reshape(stp_f, [num_steps*num_runs,1]);
-r_samples = zeros(length(r_samp_locs),num_pads);
+% % Finding sample values of baseline-corrected rsponse to be used in the 
+% % response vs concentration plot
+% r_samp_locs = reshape(stp_f, [num_steps*num_runs,1]);
+% r_samples = zeros(length(r_samp_locs),num_pads);
 
-for point = 1:length(r_samp_locs)
-    loc = r_samp_locs(point);
-    r_samp_range = (loc-r_sample_width/2):(loc+r_sample_width/2);
-    r_samples(point,:) = mean(r_blc(r_samp_range,:));
-end
-% Reshaping the samples into steps x runs x pads
-r_samples= reshape(r_samples, [num_steps num_runs num_pads]);
+% for point = 1:length(r_samp_locs)
+%     loc = r_samp_locs(point);
+%     r_samp_range = (loc-r_sample_width/2):(loc+r_sample_width/2);
+%     r_samples(point,:) = mean(r_blc(r_samp_range,:));
+% end
+% % Reshaping the samples into steps x runs x pads
+% r_samples= reshape(r_samples, [num_steps num_runs num_pads]);
 
 %% File Name - Part I
 % Here is a quick note of how each file name is generated.
