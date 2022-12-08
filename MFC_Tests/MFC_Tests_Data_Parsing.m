@@ -7,17 +7,17 @@ close all; clear; clc; % clean your workspace first becuase you can import data 
 %_________________________
 %% Enter data 
 % date and info
-addinfo = "11/23/2022 - Board2 - O2, RH Permselect"; %enter any information about this test bthat is not contained in the headerfile
-chip = 21; %enter chip number (E.G. 1 for AMES1, etc.)
+addinfo = "12/05/2022 - Board1 - N2O,Air, RH Bubbler"; %enter any information about this test bthat is not contained in the headerfile
+chip = 22; %enter chip number (E.G. 1 for AMES1, etc.)
 % Enter MFC Parameters, % ACCEPTABLE GASES: N2O, NO, CO2, CO, NO2, Concentration in PPM
 
 % MFC0 - what gas bottle is connected?
-gas1 = "NO";
-Gas1Conc = 104;%210;%12.5;%104;[ppm] in gas bottle (source)
+gas1 = "N2O";
+Gas1Conc = 210;%104;%210;%12.5;%104;[ppm] in gas bottle (source)
 
 % MFC1 - what gas bottle is connected?
-gas2 = "O2";
-Gas2Conc = 23e4;%12.9; 
+gas2 = "N2";
+Gas2Conc = 100e4;%12.9; 
 
 %% load data files and struct ==================================================================
 

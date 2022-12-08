@@ -7,8 +7,19 @@
 % something on the fly
 figure(30)
 hold on
-plot(CNT_Results_NO(116).timeE(:,:)-CNT_Results_NO(116).timeE(1,:), CNT_Results_NO(116).r(:,1:6)./CNT_Results_NO(116).r(800,1:6));
-legend('Pad 1','Pad 2','Pad 3','Pad 4','Pad 5','Pad 6')
+yyaxis left
+plot(CNT_Results_NO(120).timeE(:,:)-CNT_Results_NO(120).timeE(1,:), CNT_Results_NO(120).r(:,1:6)./CNT_Results_NO(120).r(800,1:6));
+legend('NO Pad 1','Pad 2','Pad 3','Pad 4','Pad 5','Pad 6')
+yyaxis right
+plot(CNT_Results_NO(120).timeE(:,:)-CNT_Results_NO(120).timeE(1,:), CNT_Results_NO(120).n2oppm(:,:));
+
+figure(31)
+hold on
+yyaxis left
+plot(CNT_Results_NO(118).timeE(:,:)-CNT_Results_NO(118).timeE(1,:), CNT_Results_NO(118).r(:,1:6)./CNT_Results_NO(118).r(800,1:6));
+legend('NO Pad 1','Pad 2','Pad 3','Pad 4','Pad 5','Pad 6')
+yyaxis right
+plot(CNT_Results_NO(118).timeE(:,:)-CNT_Results_NO(118).timeE(1,:), CNT_Results_NO(118).noppm(:,:));
 
 figure(31); 
 plot(CNT_Results_NO(116).timeE(:,:)-CNT_Results_NO(116).timeE(1,:), CNT_Results_NO(116).r(:,1:6)./CNT_Results_NO(116).r(800,1:6))
