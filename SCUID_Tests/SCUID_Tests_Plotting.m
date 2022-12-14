@@ -2,7 +2,7 @@
 % This script reads parsed TeraTerm data and makes plots.
 % Author: Jerry Chen
 % Time Created: Aug 25,2022
-% Last Edited:  Oct 27,2022
+% Last Edited:  Oct 27,2022n
 
 clear; close all; clc;
 
